@@ -110,7 +110,18 @@ if (allPresent(cloudinaryFields)) {
   )
 }
 
-const resendConfigured = allPresent(["RESEND_API_KEY", "RESEND_FROM_EMAIL"])
+const resendApiKeyConfigured = Boolean(process.env.RESEND_API_KEY?.trim())
+const resendFromConfigured = Boolean(process.env.RESEND_FROM_EMAIL?.trim())
+const resendConfigured = resendApiKeyConfigured && resendFromConfigured
+const requireResendInProduction = process.env.REQUIRE_RESEND_IN_PRODUCTION === "true"
+
+if (resendApiKeyConfigured !== resendFromConfigured) {
+  throw new MedusaError(
+    MedusaError.Types.INVALID_DATA,
+    "Resend configuration is incomplete. Set both RESEND_API_KEY and RESEND_FROM_EMAIL, or leave both empty."
+  )
+}
+
 const emailProvider = resendConfigured
   ? {
       resolve: "./src/modules/resend",
@@ -145,10 +156,10 @@ modules.push({
   },
 })
 
-if (production && !resendConfigured) {
+if (production && requireResendInProduction && !resendConfigured) {
   throw new MedusaError(
     MedusaError.Types.INVALID_DATA,
-    "RESEND_API_KEY and RESEND_FROM_EMAIL are required in production"
+    "RESEND_API_KEY and RESEND_FROM_EMAIL are required when REQUIRE_RESEND_IN_PRODUCTION=true"
   )
 }
 

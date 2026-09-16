@@ -53,6 +53,8 @@ No `NEXT_PUBLIC_MEDIA_URL` is required: Medusa returns complete Cloudinary CDN U
 
 Verify the sending domain in Resend and configure SPF/DKIM there. Set `RESEND_API_KEY` and `RESEND_FROM_EMAIL` on both Render processes. Set `RESEND_REPLY_TO` if replies should go to a monitored inbox.
 
+Render staging may boot before Resend is configured by keeping `REQUIRE_RESEND_IN_PRODUCTION=false`; Medusa then uses the local email provider instead of real delivery. Before the final public production launch, set `REQUIRE_RESEND_IN_PRODUCTION=true` on both Render processes so a missing Resend configuration fails closed. A partial Resend configuration (only key or only sender) always fails at startup.
+
 For local/staging tests, set `RESEND_DEV_RECIPIENT` and keep `RESEND_ENFORCE_DEV_RECIPIENT=true`; this prevents accidental messages to real customers while developers enthusiastically click buttons.
 
 Run `TEST_EMAIL_TO=<safe-address> npm run email:test` after provider setup. The authenticated Admin endpoint `POST /admin/minara/email/test` is also available for later admin tooling.
