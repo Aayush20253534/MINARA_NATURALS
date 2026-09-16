@@ -45,7 +45,16 @@ jobs:
           --health-retries 5
     env:
       NODE_ENV: test
+      # Medusa test-utils creates and drops an isolated database for HTTP
+      # integration tests. It reads DB_* credentials directly at module load,
+      # so DATABASE_URL alone is not sufficient for the test database admin
+      # connection. Keep these aligned with the Postgres service above.
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/minara_test
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_WAITINGROOM_DATABASE: postgres
       STORE_CORS: http://localhost:3000
       ADMIN_CORS: http://localhost:9000
       AUTH_CORS: http://localhost:3000,http://localhost:9000
