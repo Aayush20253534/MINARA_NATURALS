@@ -1,2 +1,10 @@
 node_modules/
+.medusa/
+/static/
+/uploads/
 .env
+.env.*
+!.env.example
+!.env.test
+coverage/
+*.log

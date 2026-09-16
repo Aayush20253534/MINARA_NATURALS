@@ -1,4 +1,33 @@
 *.patch
 *.zip
 assets/
+
+# Local secrets. Keep examples tracked.
 .env
+.env.*
+!.env.example
+!**/.env.example
+!**/.env.test
+
+# Dependencies and build output.
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+.medusa/
+**/.medusa/
+dist/
+coverage/
+
+# Runtime uploads/logs.
+server/static/
+server/uploads/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor / OS noise.
+.DS_Store
+Thumbs.db
+.vscode/*.log

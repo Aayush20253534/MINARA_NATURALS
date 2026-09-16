@@ -1,0 +1,114 @@
+services:
+  - type: web
+    name: minara-commerce-api
+    runtime: node
+    rootDir: server
+    plan: starter
+    buildCommand: npm install && npm run build && cd .medusa/server && npm install --omit=dev
+    preDeployCommand: npm run predeploy
+    startCommand: cd .medusa/server && npm run start -- --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+      - key: NODE_ENV
+        value: production
+      - key: MEDUSA_WORKER_MODE
+        value: server
+      - key: MEDUSA_FF_CACHING
+        value: "true"
+      - key: DISABLE_MEDUSA_ADMIN
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+      - key: STORE_CORS
+        sync: false
+      - key: ADMIN_CORS
+        sync: false
+      - key: AUTH_CORS
+        sync: false
+      - key: MEDUSA_BACKEND_URL
+        sync: false
+      - key: STOREFRONT_URL
+        sync: false
+      - key: SPACES_ENDPOINT
+        sync: false
+      - key: SPACES_REGION
+        sync: false
+      - key: SPACES_BUCKET
+        sync: false
+      - key: SPACES_ACCESS_KEY_ID
+        sync: false
+      - key: SPACES_SECRET_ACCESS_KEY
+        sync: false
+      - key: SPACES_CDN_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: RESEND_REPLY_TO
+        sync: false
+
+  - type: worker
+    name: minara-commerce-worker
+    runtime: node
+    rootDir: server
+    plan: starter
+    buildCommand: npm install && npm run build && cd .medusa/server && npm install --omit=dev
+    startCommand: cd .medusa/server && npm run start
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+      - key: NODE_ENV
+        value: production
+      - key: MEDUSA_WORKER_MODE
+        value: worker
+      - key: MEDUSA_FF_CACHING
+        value: "true"
+      - key: DISABLE_MEDUSA_ADMIN
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: COOKIE_SECRET
+        sync: false
+      - key: STORE_CORS
+        sync: false
+      - key: ADMIN_CORS
+        sync: false
+      - key: AUTH_CORS
+        sync: false
+      - key: MEDUSA_BACKEND_URL
+        sync: false
+      - key: STOREFRONT_URL
+        sync: false
+      - key: SPACES_ENDPOINT
+        sync: false
+      - key: SPACES_REGION
+        sync: false
+      - key: SPACES_BUCKET
+        sync: false
+      - key: SPACES_ACCESS_KEY_ID
+        sync: false
+      - key: SPACES_SECRET_ACCESS_KEY
+        sync: false
+      - key: SPACES_CDN_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: RESEND_REPLY_TO
+        sync: false

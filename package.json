@@ -1,0 +1,24 @@
+{
+  "name": "minara-naturals-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MINARA NATURALS commerce platform workspace.",
+  "engines": {
+    "node": ">=22.12.0 <25"
+  },
+  "scripts": {
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "npm --prefix client run build",
+    "build:server": "npm --prefix server run build",
+    "lint": "npm run lint:client && npm run lint:server",
+    "typecheck": "npm run typecheck:client && npm run typecheck:server",
+    "typecheck:client": "npm --prefix client run typecheck",
+    "typecheck:server": "npm --prefix server run typecheck",
+    "test": "npm --prefix server run test",
+    "check": "npm run lint && npm run typecheck && npm run build",
+    "lint:client": "npm --prefix client run lint",
+    "lint:server": "npm --prefix server run lint"
+  }
+}
