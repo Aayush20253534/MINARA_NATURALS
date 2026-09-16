@@ -27,7 +27,7 @@ Medusa v2 Server + Admin
       +--> Neon PostgreSQL
       |    commerce + custom module data
       |
-      +--> DigitalOcean Spaces + CDN
+      +--> Cloudinary
            product/brand media
 
 Render Background Worker
@@ -310,11 +310,11 @@ For job/event reliability, use a persistence/eviction configuration appropriate 
 
 ---
 
-## 8. Media storage: DigitalOcean Spaces + CDN
+## 8. Product/media delivery: Cloudinary
 
-The original proposal expects a large image catalogue with roughly 7–8 images per SKU. Retain object storage/CDN rather than storing images on Render disks or in PostgreSQL.
+The original proposal expects a large image catalogue with roughly 7–8 images per SKU. For the initial implementation, Cloudinary replaces DigitalOcean Spaces so MINARA can use managed image storage, CDN delivery, and image transformations without maintaining an S3-compatible bucket.
 
-Use an S3-compatible Medusa file provider targeting DigitalOcean Spaces.
+Medusa's File Module is configured with a **custom Cloudinary provider** implemented inside `server/src/modules/cloudinary`. The provider uses Cloudinary's server-side authenticated Upload API; no Cloudinary secret is exposed to the storefront. Medusa stores the provider key and the complete Cloudinary `secure_url` returned after upload.
 
 Store:
 
@@ -326,15 +326,26 @@ Store:
 Rules:
 
 - never commit production product photography into the application repository;
-- use unique object keys, not raw user filenames as identifiers;
-- validate upload MIME/type/size;
-- avoid exposing storage write credentials to the browser;
-- use CDN URLs for public delivery;
-- support deletion/cleanup when admin replaces media;
+- use generated Cloudinary public IDs under `CLOUDINARY_FOLDER`, not raw user filenames as durable identifiers;
+- validate upload MIME/type/size before invoking the File Module;
+- keep `CLOUDINARY_API_SECRET` strictly backend-only;
+- use Cloudinary's returned HTTPS CDN URLs for public delivery;
+- delete Cloudinary assets when admin removes/replaces managed media;
 - preserve accessible alt text separately from the file itself;
-- use image transformation/optimization through the frontend delivery pipeline where appropriate.
+- use Cloudinary/Next.js image optimization deliberately rather than stacking unnecessary transformations;
+- the Phase 0 provider intentionally handles authenticated server-side uploads rather than browser-direct presigned uploads.
 
----
+Environment variables:
+
+```text
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_FOLDER=minara
+MEDIA_MAX_FILE_SIZE_MB=10
+```
+
+The storefront does not need a Cloudinary secret or a `NEXT_PUBLIC_MEDIA_URL`; product/image records carry complete Cloudinary URLs. `client/next.config.ts` allowlists `res.cloudinary.com`.
 
 ## 9. Transactional email: Resend
 
@@ -377,6 +388,10 @@ Environment variable:
 RESEND_API_KEY=
 EMAIL_FROM=
 EMAIL_REPLY_TO=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_FOLDER=minara
 ```
 
 Do not expose `RESEND_API_KEY` to Next.js client code.
@@ -643,15 +658,13 @@ DISABLE_MEDUSA_ADMIN=false
 RESEND_API_KEY=
 EMAIL_FROM=
 EMAIL_REPLY_TO=
-SPACES_ENDPOINT=
-SPACES_REGION=
-SPACES_BUCKET=
-SPACES_ACCESS_KEY_ID=
-SPACES_SECRET_ACCESS_KEY=
-SPACES_CDN_URL=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_FOLDER=minara
 ```
 
-Names for storage-provider configuration may differ based on the implemented Medusa provider; keep `.env.example` authoritative once code exists.
+Keep `server/.env.example` authoritative for Cloudinary provider configuration.
 
 ### 18.3 Render: Medusa worker
 

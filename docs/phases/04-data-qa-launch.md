@@ -144,12 +144,14 @@ Check:
 - persistence/eviction configured for Medusa workloads;
 - memory monitoring.
 
-### DigitalOcean Spaces
+### Cloudinary
 
-- production bucket/CDN;
-- CORS/access policy;
-- upload credentials backend-only;
-- public delivery verified.
+- production Cloudinary product environment;
+- `CLOUDINARY_CLOUD_NAME`, API key, and API secret configured on Render;
+- API secret backend-only;
+- media folder convention confirmed;
+- public `res.cloudinary.com` delivery verified;
+- upload/delete smoke test completed.
 
 ### Resend
 

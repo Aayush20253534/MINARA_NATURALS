@@ -11,7 +11,11 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       dependencies: {
         database: true,
         redisConfigured: Boolean(process.env.REDIS_URL),
-        spacesConfigured: Boolean(process.env.SPACES_BUCKET && process.env.SPACES_CDN_URL),
+        cloudinaryConfigured: Boolean(
+          process.env.CLOUDINARY_CLOUD_NAME &&
+            process.env.CLOUDINARY_API_KEY &&
+            process.env.CLOUDINARY_API_SECRET
+        ),
         resendConfigured: Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL),
       },
     })

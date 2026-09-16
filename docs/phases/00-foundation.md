@@ -125,23 +125,24 @@ Do not create a parallel custom Express API for commerce. Any custom MINARA API 
 
 ---
 
-## Part 0.6 — DigitalOcean Spaces media provider
+## Part 0.6 — Cloudinary media provider
 
 ### Tasks
 
-- create/configure object storage bucket and CDN;
-- wire an S3-compatible Medusa file provider;
-- implement environment variable contract;
-- test upload/delete from Admin;
-- confirm public CDN delivery;
+- create a Cloudinary product environment/account;
+- wire a custom Medusa File Module provider to Cloudinary's authenticated Upload API;
+- keep `CLOUDINARY_API_SECRET` backend-only and expose no upload secret to Next.js;
+- implement the environment variable contract for cloud name, API key, API secret, and media folder;
+- test upload/delete from Admin and MINARA's authenticated upload route;
+- confirm public delivery through `res.cloudinary.com`;
 - add file size/type validation;
-- confirm frontend image host configuration for approved CDN domain.
+- allow `res.cloudinary.com` in the Next.js image configuration.
 
 ### Exit criteria
 
-- product image uploaded through backend/admin is delivered from CDN;
-- private write credentials remain backend-only;
-- deleting/replacing an image behaves predictably.
+- product image uploaded through backend/admin is stored in Cloudinary and returned as a Cloudinary CDN URL;
+- Cloudinary API credentials remain backend-only;
+- deleting/replacing an image invalidates/removes the corresponding Cloudinary asset predictably.
 
 ---
 
@@ -204,7 +205,7 @@ Do not begin full Phase 1 until:
 - worker is running on Render;
 - Neon is connected;
 - Render Key Value is connected;
-- Spaces media upload works;
+- Cloudinary media upload works;
 - Resend test email works;
 - storefront can fetch from backend;
 - shared design primitives exist;

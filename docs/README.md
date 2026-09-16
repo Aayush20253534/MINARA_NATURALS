@@ -40,7 +40,7 @@ The original proposal recommended DigitalOcean for application/database hosting 
 | Transactional email | **Resend** |
 | Commerce engine | **Medusa v2** |
 | Frontend | **Next.js 16 App Router** |
-| Media/object storage | **DigitalOcean Spaces + CDN**, retained from the proposal unless the client changes it later |
+| Product/media delivery | **Cloudinary**, replacing DigitalOcean Spaces for the initial implementation |
 | Redis-compatible runtime dependency | **Render Key Value / Valkey**, required by production Medusa and kept in the same Render region as the backend |
 
 The application should not connect directly from Vercel to Neon for normal commerce operations. The storefront talks to Medusa; Medusa owns commerce persistence.
@@ -113,7 +113,7 @@ The initial agreed build is complete only when the platform can, at minimum:
 - present and administer franchise applications;
 - manage products, categories, variants, prices, inventory, orders, customers, coupons/promotions, and homepage content from admin tooling;
 - store production data in Neon PostgreSQL;
-- store product media in object storage/CDN;
+- store product media in Cloudinary and deliver it through Cloudinary CDN URLs;
 - send transactional emails through Resend;
 - run the Next.js storefront on Vercel;
 - run Medusa server and worker processes on Render with a Redis-compatible Render Key Value service;

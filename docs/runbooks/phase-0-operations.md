@@ -32,11 +32,22 @@ Create a Render Key Value/Valkey instance in the same region and give both servi
 
 After first deployment set `MEDUSA_BACKEND_URL` to the final HTTPS API origin, and update `STORE_CORS`, `ADMIN_CORS`, and `AUTH_CORS` to the exact Vercel/Admin origins. Never use `*` for production auth CORS.
 
-## 4. DigitalOcean Spaces
+## 4. Cloudinary
 
-Create a private-or-controlled Space and CDN endpoint. Populate all `SPACES_*` variables. Production intentionally refuses to boot with a half-configured Spaces provider. Product images are uploaded through Medusa's File Module; `POST /admin/minara/uploads` adds an authenticated, MIME/size-limited upload surface for MINARA-specific admin tooling.
+Create a Cloudinary account/product environment and copy the **Cloud name**, **API Key**, and **API Secret** from Cloudinary into both Render Medusa services. Set:
 
-Allowed Phase 0 image types: JPEG, PNG, WebP, AVIF. Default maximum: 10 MiB per file, configurable with `MEDIA_MAX_FILE_SIZE_MB`.
+```text
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_FOLDER=minara
+```
+
+The code registers a custom Medusa File Module provider when all three required Cloudinary credentials are present. Production intentionally refuses to boot with a partial Cloudinary configuration. The provider uploads through Cloudinary's authenticated Upload API and stores the returned `secure_url` in Medusa. The API secret never belongs in Vercel or browser code.
+
+`POST /admin/minara/uploads` remains the authenticated, MIME/size-limited upload surface for MINARA-specific admin tooling. Allowed Phase 0 image types are JPEG, PNG, WebP, and AVIF. The default maximum is 10 MiB per file, configurable with `MEDIA_MAX_FILE_SIZE_MB`.
+
+No `NEXT_PUBLIC_MEDIA_URL` is required: Medusa returns complete Cloudinary CDN URLs and Next.js is configured to accept `https://res.cloudinary.com/**`.
 
 ## 5. Resend
 
@@ -53,7 +64,6 @@ Set the Vercel project Root Directory to `client` and configure:
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_MEDUSA_BACKEND_URL`
 - `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_MEDIA_URL` (Spaces CDN base URL)
 
 Use separate values for Preview and Production. Preview deployments must not point at production commerce data unless explicitly intended.
 
@@ -66,6 +76,6 @@ Do not mark Phase 0 operationally complete until all of the following are true:
 - Admin login works.
 - Storefront can read a product through the Store API using the publishable key.
 - Worker is running with shared Redis/Valkey.
-- An authenticated test upload reaches the Spaces CDN.
+- An authenticated test upload reaches the Cloudinary CDN.
 - A Resend test reaches the controlled test inbox.
 - Vercel has no secrets other than intentionally public `NEXT_PUBLIC_*` values.

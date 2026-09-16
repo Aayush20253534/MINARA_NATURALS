@@ -79,33 +79,25 @@ if (redisUrl) {
   )
 }
 
-const spacesFields = [
-  "SPACES_ENDPOINT",
-  "SPACES_REGION",
-  "SPACES_BUCKET",
-  "SPACES_ACCESS_KEY_ID",
-  "SPACES_SECRET_ACCESS_KEY",
-  "SPACES_CDN_URL",
+const cloudinaryFields = [
+  "CLOUDINARY_CLOUD_NAME",
+  "CLOUDINARY_API_KEY",
+  "CLOUDINARY_API_SECRET",
 ]
 
-if (allPresent(spacesFields)) {
+if (allPresent(cloudinaryFields)) {
   modules.push({
     resolve: "@medusajs/medusa/file",
     options: {
       providers: [
         {
-          resolve: "@medusajs/medusa/file-s3",
-          id: "spaces",
+          resolve: "./src/modules/cloudinary",
+          id: "cloudinary",
           options: {
-            file_url: process.env.SPACES_CDN_URL,
-            access_key_id: process.env.SPACES_ACCESS_KEY_ID,
-            secret_access_key: process.env.SPACES_SECRET_ACCESS_KEY,
-            region: process.env.SPACES_REGION,
-            bucket: process.env.SPACES_BUCKET,
-            endpoint: process.env.SPACES_ENDPOINT,
-            prefix: process.env.SPACES_PREFIX || "minara",
-            cache_control:
-              process.env.SPACES_CACHE_CONTROL || "public, max-age=31536000, immutable",
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+            folder: process.env.CLOUDINARY_FOLDER || "minara",
           },
         },
       ],
@@ -114,7 +106,7 @@ if (allPresent(spacesFields)) {
 } else if (production) {
   throw new MedusaError(
     MedusaError.Types.INVALID_DATA,
-    `DigitalOcean Spaces is incomplete. Required: ${spacesFields.join(", ")}`
+    `Cloudinary is incomplete. Required: ${cloudinaryFields.join(", ")}`
   )
 }
 

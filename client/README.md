@@ -14,7 +14,7 @@ The Medusa API defaults to `http://localhost:9000`. After running the backend se
 
 ## Vercel
 
-Set the project root directory to `client` and configure the variables from `.env.example` separately for Preview and Production. Only `NEXT_PUBLIC_*` values belong in the storefront environment; database, Resend and Spaces credentials belong exclusively on Render.
+Set the project root directory to `client` and configure the variables from `.env.example` separately for Preview and Production. Only `NEXT_PUBLIC_*` values belong in the storefront environment; database, Resend and Cloudinary credentials belong exclusively on Render.
 
 ## Quality
 

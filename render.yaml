@@ -38,18 +38,14 @@ services:
         sync: false
       - key: STOREFRONT_URL
         sync: false
-      - key: SPACES_ENDPOINT
+      - key: CLOUDINARY_CLOUD_NAME
         sync: false
-      - key: SPACES_REGION
+      - key: CLOUDINARY_API_KEY
         sync: false
-      - key: SPACES_BUCKET
+      - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: SPACES_ACCESS_KEY_ID
-        sync: false
-      - key: SPACES_SECRET_ACCESS_KEY
-        sync: false
-      - key: SPACES_CDN_URL
-        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: minara
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL
@@ -94,18 +90,14 @@ services:
         sync: false
       - key: STOREFRONT_URL
         sync: false
-      - key: SPACES_ENDPOINT
+      - key: CLOUDINARY_CLOUD_NAME
         sync: false
-      - key: SPACES_REGION
+      - key: CLOUDINARY_API_KEY
         sync: false
-      - key: SPACES_BUCKET
+      - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: SPACES_ACCESS_KEY_ID
-        sync: false
-      - key: SPACES_SECRET_ACCESS_KEY
-        sync: false
-      - key: SPACES_CDN_URL
-        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: minara
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL

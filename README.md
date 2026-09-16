@@ -8,10 +8,10 @@ Production foundation for the MINARA NATURALS commerce platform.
 - `server/` — Medusa v2 commerce API and Admin deployed on Render.
 - Neon PostgreSQL — source of truth for commerce and customer data.
 - Render Key Value / Valkey — production events, workflows, cache, locks and sessions.
-- DigitalOcean Spaces + CDN — production product/media storage.
+- Cloudinary — production product/media storage.
 - Resend — transactional email.
 
-The application is intentionally configured so local development can boot without Spaces, Redis, or Resend. Production configuration fails closed for required secrets and swaps in the external providers when their environment variables are present.
+The application is intentionally configured so local development can boot without Cloudinary, Redis, or Resend. Production configuration fails closed for required secrets and swaps in the external providers when their environment variables are present.
 
 ## Runtime
 
@@ -38,7 +38,7 @@ No API key or cloud resource belongs in Git. Create the services yourself and ad
 
 - Neon: `DATABASE_URL`
 - Render Key Value: `REDIS_URL`
-- DigitalOcean Spaces: all `SPACES_*` values in `server/.env.example`
+- Cloudinary: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, and optional `CLOUDINARY_FOLDER`
 - Resend: `RESEND_API_KEY`, `RESEND_FROM_EMAIL`
 - Vercel: all `NEXT_PUBLIC_*` values in `client/.env.example`
 
