@@ -8,9 +8,9 @@
     "node": ">=22.12.0 <25"
   },
   "scripts": {
-    "build": "medusa build",
+    "build": "medusa build && cd .medusa/server && npm ci --omit=dev",
     "dev": "medusa develop",
-    "start": "medusa start",
+    "start": "cd .medusa/server && medusa start",
     "typecheck": "tsc --noEmit",
     "db:migrate": "medusa db:migrate",
     "db:rollback": "medusa db:rollback",

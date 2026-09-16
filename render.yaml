@@ -4,9 +4,9 @@ services:
     runtime: node
     rootDir: server
     plan: starter
-    buildCommand: npm install && npm run build && cd .medusa/server && npm install --omit=dev
+    buildCommand: npm ci --include=dev && npm run build
     preDeployCommand: npm run predeploy
-    startCommand: cd .medusa/server && npm run start -- --host 0.0.0.0 --port $PORT
+    startCommand: npm run start -- --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     autoDeploy: true
     envVars:
@@ -60,8 +60,8 @@ services:
     runtime: node
     rootDir: server
     plan: starter
-    buildCommand: npm install && npm run build && cd .medusa/server && npm install --omit=dev
-    startCommand: cd .medusa/server && npm run start
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
