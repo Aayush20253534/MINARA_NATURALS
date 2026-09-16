@@ -15,7 +15,7 @@ The application is intentionally configured so local development can boot withou
 
 ## Runtime
 
-Use Node `22.12.0` or a newer compatible Node 22/24 release. The repository ships `.nvmrc` and `.node-version`.
+Use Node `22.22.0` or a newer compatible Node 22/24 release. The repository ships `.nvmrc` and `.node-version`.
 
 ## First local setup
 
