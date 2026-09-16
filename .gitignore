@@ -1,4 +1,4 @@
-.patch
-.zip
+*.patch
+*.zip
 assets/
 .env
