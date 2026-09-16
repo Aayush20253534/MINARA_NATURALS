@@ -30,7 +30,7 @@ The root `render.yaml` declares two services from `server/`:
 
 Create a Render Key Value/Valkey instance in the same region and give both services the same `REDIS_URL`. Give both processes the same database/provider secrets. The API service alone runs `db:migrate` before deploy.
 
-For both Render services, keep the deployment commands aligned with the repository scripts. The build command is `npm ci --include=dev && npm run build`; the API start command is `npm run start -- --host 0.0.0.0 --port $PORT`; and the worker start command is `npm run start`. Do not run `medusa start` directly from `server/`: a production Medusa build must be started from `.medusa/server`, otherwise the Admin bundle (including `public/admin/index.html`) cannot be resolved.
+For both Render services, keep the deployment commands aligned with the repository scripts. The build command is `npm ci --include=dev --legacy-peer-deps && npm run build`; the API start command is `npm run start -- --host 0.0.0.0 --port $PORT`; and the worker start command is `npm run start`. Do not run `medusa start` directly from `server/`: a production Medusa build must be started from `.medusa/server`, otherwise the Admin bundle (including `public/admin/index.html`) cannot be resolved.
 
 After first deployment set `MEDUSA_BACKEND_URL` to the final HTTPS API origin, and update `STORE_CORS`, `ADMIN_CORS`, and `AUTH_CORS` to the exact Vercel/Admin origins. Never use `*` for production auth CORS.
 

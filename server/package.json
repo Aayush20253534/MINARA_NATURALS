@@ -8,7 +8,7 @@
     "node": ">=22.12.0 <25"
   },
   "scripts": {
-    "build": "medusa build && cd .medusa/server && npm ci --omit=dev",
+    "build": "medusa build && cd .medusa/server && npm install --omit=dev --legacy-peer-deps",
     "dev": "medusa develop",
     "start": "cd .medusa/server && medusa start",
     "typecheck": "tsc --noEmit",
