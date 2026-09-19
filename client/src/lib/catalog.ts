@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { medusaConfig } from "@/lib/medusa";
 
 export type CatalogCategory = {
@@ -13,9 +14,13 @@ export type CatalogVariant = {
   title: string;
   sku?: string | null;
   inventory_quantity?: number | null;
+  manage_inventory?: boolean;
+  allow_backorder?: boolean;
   calculated_price?: {
     calculated_amount?: number | null;
     currency_code?: string | null;
+    original_amount?: number | null;
+    calculated_price?: { price_list_type?: string | null } | null;
   } | null;
 };
 
@@ -30,151 +35,124 @@ export type CatalogProduct = {
     id?: string;
     url: string;
   }>;
-  metadata?: Record<string, string | number | boolean | null> | null;
+  metadata?: Record<string, unknown> | null;
   categories?: Array<{ id: string; name: string; handle: string }>;
   variants?: CatalogVariant[];
 };
 
-type ProductCategoryListResponse = {
-  product_categories?: CatalogCategory[];
-};
-
-type ProductListResponse = {
-  products?: CatalogProduct[];
+export type CatalogueResult = {
+  products: CatalogProduct[];
+  categories: CatalogCategory[];
+  category: CatalogCategory | null;
+  facets: { brands: string[]; packs: string[] };
+  count: number;
+  page: number;
+  limit: number;
 };
 
 const productFields =
-  "+thumbnail,*images,*variants.calculated_price,+variants.inventory_quantity,+metadata,*categories,*variants.options";
+  "id,title,handle,subtitle,description,thumbnail,*images,*variants,*variants.calculated_price,+variants.inventory_quantity,+variants.manage_inventory,+variants.allow_backorder,+metadata,*categories,*variants.options";
 
-async function storeFetch<T>(path: string): Promise<T | null> {
-  if (!medusaConfig.publishableKey) return null;
+export const storeFetch = cache(async <T>(path: string): Promise<T> => {
+  if (!medusaConfig.publishableKey)
+    throw new Error("Storefront publishable key is not configured");
+  const response = await fetch(`${medusaConfig.backendUrl}${path}`, {
+    headers: { "x-publishable-api-key": medusaConfig.publishableKey },
+    cache: "no-store",
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok)
+    throw new Error(`Catalogue request failed (${response.status})`);
+  return response.json() as Promise<T>;
+});
 
-  try {
-    const response = await fetch(`${medusaConfig.backendUrl}${path}`, {
-      headers: {
-        "x-publishable-api-key": medusaConfig.publishableKey,
-      },
-      next: { revalidate: 60 },
-      signal: AbortSignal.timeout(7000),
-    });
-
-    if (!response.ok) return null;
-    return (await response.json()) as T;
-  } catch {
-    return null;
-  }
+export function getCatalogue(params = new URLSearchParams()) {
+  return storeFetch<CatalogueResult>(`/store/minara/catalogue?${params}`);
 }
-
-function productRank(product: CatalogProduct) {
-  const metadata = product.metadata ?? {};
-  return Number(Boolean(metadata.featured)) * 2 + Number(Boolean(metadata.popular));
-}
-
-function collectCategoryHandles(category: CatalogCategory, result = new Set<string>()) {
-  result.add(category.handle);
-  for (const child of category.category_children ?? []) {
-    collectCategoryHandles(child, result);
-  }
-  return result;
-}
-
 export function catalogProductImage(product: CatalogProduct) {
-  return product.thumbnail || product.images?.[0]?.url || null;
+  const src = product.thumbnail || product.images?.[0]?.url;
+  if (!src) return null;
+  // Match next/image's trusted media source; never crash a whole grid on bad media.
+  try {
+    const url = new URL(src);
+    return url.protocol === "https:" && url.hostname === "res.cloudinary.com"
+      ? src
+      : null;
+  } catch {
+    return src.startsWith("/images/") ? src : null;
+  }
 }
-
 export function formatCatalogPrice(product: CatalogProduct) {
   const prices = (product.variants ?? [])
-    .map((variant) => variant.calculated_price?.calculated_amount)
-    .filter((amount): amount is number => typeof amount === "number");
-
+    .map((v) => v.calculated_price)
+    .filter(
+      (p) =>
+        p &&
+        typeof p.calculated_amount === "number" &&
+        Number.isFinite(p.calculated_amount),
+    );
   if (!prices.length) return null;
-
+  const currency = prices[0]!.currency_code || "inr";
+  const amounts = prices
+    .filter((p) => (p!.currency_code || "inr") === currency)
+    .map((p) => p!.calculated_amount!);
   const formatted = new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(Math.min(...prices));
-
-  return prices.length > 1 ? `From ${formatted}` : formatted;
+    currency: /^[a-z]{3}$/i.test(currency) ? currency : "INR",
+    maximumFractionDigits: 2,
+  }).format(Math.min(...amounts));
+  return new Set(amounts).size > 1 ? `From ${formatted}` : formatted;
 }
-
 export function getCatalogStockState(product: CatalogProduct) {
-  const quantities = (product.variants ?? [])
-    .map((variant) => variant.inventory_quantity)
-    .filter((quantity): quantity is number => typeof quantity === "number");
-
-  if (!quantities.length) {
-    return { label: "Availability tracked", state: "neutral" as const };
-  }
-  if (quantities.every((quantity) => quantity <= 0)) {
+  const variants = product.variants ?? [];
+  if (variants.some((v) => v.manage_inventory === false || v.allow_backorder))
+    return { label: "Available", state: "in" as const };
+  const quantities = variants
+    .map((v) => v.inventory_quantity)
+    .filter((n): n is number => typeof n === "number");
+  if (quantities.some((n) => n > 0))
+    return { label: "In stock", state: "in" as const };
+  if (quantities.length && quantities.length === variants.length)
     return { label: "Out of stock", state: "out" as const };
-  }
-  if (quantities.some((quantity) => quantity > 0 && quantity <= 5)) {
-    return { label: "Limited stock", state: "low" as const };
-  }
-  return { label: "In stock", state: "in" as const };
+  return { label: "Check availability", state: "neutral" as const };
 }
-
 export async function getCatalogCategories() {
-  const query = new URLSearchParams({
-    limit: "100",
-    include_descendants_tree: "true",
-    fields: "*category_children",
-  });
-  const response = await storeFetch<ProductCategoryListResponse>(
-    `/store/product-categories?${query.toString()}`,
-  );
-  return response?.product_categories ?? [];
+  return (await getCatalogue(new URLSearchParams({ limit: "1" }))).categories;
 }
-
-export async function getCatalogProducts(limit = 100) {
+export async function getProductByHandle(handle: string) {
+  const { regions } = await storeFetch<{
+    regions: Array<{
+      id: string;
+      currency_code: string;
+      countries: Array<{ iso_2: string }>;
+    }>;
+  }>("/store/regions?limit=100");
+  const region = regions.find(
+    (r) =>
+      r.currency_code === "inr" && r.countries.some((c) => c.iso_2 === "in"),
+  );
+  if (!region) throw new Error("India pricing region is unavailable");
   const query = new URLSearchParams({
-    limit: String(limit),
+    handle,
+    limit: "1",
+    region_id: region.id,
     country_code: "in",
     fields: productFields,
   });
-  const response = await storeFetch<ProductListResponse>(
-    `/store/products?${query.toString()}`,
+  const { products } = await storeFetch<{ products: CatalogProduct[] }>(
+    `/store/products?${query}`,
   );
-
-  return (response?.products ?? [])
-    .filter((product) => product.metadata?.seed_catalog === "phase-1-1")
-    .sort((left, right) => productRank(right) - productRank(left));
+  return products[0] ?? null;
 }
-
-export async function getProductByHandle(handle: string) {
-  const products = await getCatalogProducts();
-  return products.find((product) => product.handle === handle) ?? null;
-}
-
-export async function getCategoryWithProducts(handle: string) {
-  const [categories, products] = await Promise.all([
-    getCatalogCategories(),
-    getCatalogProducts(),
-  ]);
-
-  const category = categories.find((item) => item.handle === handle) ?? null;
-  if (!category) return { category: null, products: [] as CatalogProduct[] };
-
-  const handles = collectCategoryHandles(category);
-  const categoryProducts = products.filter((product) =>
-    product.categories?.some((item) => handles.has(item.handle)),
-  );
-
-  return { category, products: categoryProducts };
-}
-
 export async function getCatalogPreview() {
-  const [categories, products] = await Promise.all([
-    getCatalogCategories(),
-    getCatalogProducts(),
-  ]);
-
-  return {
-    categories: categories
-      .filter((category) => !category.parent_category_id)
-      .slice(0, 6),
-    products: products.slice(0, 16),
-    connected: Boolean(categories.length || products.length),
-  };
+  try {
+    const result = await getCatalogue(new URLSearchParams({ limit: "16" }));
+    return { ...result, connected: true };
+  } catch {
+    return {
+      categories: [] as CatalogCategory[],
+      products: [] as CatalogProduct[],
+      connected: false,
+    };
+  }
 }

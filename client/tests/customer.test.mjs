@@ -1,0 +1,6 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {parseAddress,safeReturn,validPassword,validEmail} from "../src/lib/customer.ts";
+const address={first_name:"Anaya",last_name:"Shah",address_1:"12 Garden Road",city:"Pune",province:"Maharashtra",postal_code:"411001",country_code:"in",phone:"9876543210"};
+test("address parser only returns supported fields and rejects unsupported delivery",()=>{assert.equal(parseAddress({...address,customer_id:"foreign",id:"caaddr_foreign"}).customer_id,undefined);assert.equal(parseAddress({...address,postal_code:"123"}),null);assert.equal(parseAddress({...address,country_code:"us"}),null);assert.equal(parseAddress({...address,address_1:""}),null);assert.equal(parseAddress({...address,first_name:{}}),null);assert.equal(parseAddress(address).country_code,"in");});
+test("auth bounds and return targets cannot inject an external redirect",()=>{assert.equal(validPassword("too short"),false);assert.equal(validPassword("a".repeat(129)),false);assert.equal(validPassword("A long pass phrase"),true);assert.equal(validEmail("person@example.test"),true);assert.equal(validEmail("broken@"),false);for(const target of ["//evil.test","https://evil.test","/api/account",null])assert.equal(safeReturn(target),"/account");assert.equal(safeReturn("/checkout"),"/checkout");});

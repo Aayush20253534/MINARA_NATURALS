@@ -1,30 +1,78 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
-export function Drawer({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
+/** Native modal supplies focus trapping, inert background, Escape and focus restoration. */
+export function Drawer({
+  open,
+  onClose,
+  title,
+  children,
+  side = "left",
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+  side?: "left" | "right";
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   useEffect(() => {
-    if (!open) return;
+    const dialog = ref.current;
+    if (!dialog || !open) return;
+    const active = document.activeElement as HTMLElement | null;
     const previous = document.body.style.overflow;
+    dialog.showModal();
     document.body.style.overflow = "hidden";
-    const onKey = (event: KeyboardEvent) => event.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
     return () => {
+      dialog.close();
       document.body.style.overflow = previous;
-      window.removeEventListener("keydown", onKey);
+      active?.focus({ preventScroll: true });
     };
-  }, [open, onClose]);
-
-  if (!open) return null;
-
+  }, [open]);
   return (
-    <div className={cn("ui-drawer", "is-open")}>
-      <button className="ui-drawer__backdrop" type="button" onClick={onClose} aria-label="Close menu" />
-      <aside className="ui-drawer__panel" aria-label={title}>
-        <div className="ui-drawer__header"><strong>{title}</strong><button type="button" className="icon-button" onClick={onClose} aria-label="Close menu">×</button></div>
-        {children}
-      </aside>
-    </div>
+    <dialog
+      ref={ref}
+      className="ui-drawer"
+      data-side={side}
+      aria-labelledby={titleId}
+      onCancel={onClose}
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const focusable = Array.from(
+          event.currentTarget.querySelectorAll<HTMLElement>(
+            'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
+          ),
+        ).filter((element) => element.getClientRects().length > 0);
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="ui-drawer__panel">
+        <div className="ui-drawer__header">
+          <h2 id={titleId}>{title}</h2>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onClose}
+            aria-label="Close panel"
+          >
+            ×
+          </button>
+        </div>
+        {open ? children : null}
+      </div>
+    </dialog>
   );
 }

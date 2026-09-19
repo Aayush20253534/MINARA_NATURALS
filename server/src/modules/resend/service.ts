@@ -66,10 +66,10 @@ class ResendNotificationProviderService extends AbstractNotificationProviderServ
       subject: rendered.subject,
       html: rendered.html,
       text: rendered.text,
-    })
+    }, typeof notification.provider_data?.idempotency_key === "string" ? { idempotencyKey: notification.provider_data.idempotency_key } : undefined)
 
     if (error || !data?.id) {
-      this.logger.error(`Resend delivery failed: ${error?.message || "unknown provider error"}`)
+      this.logger.error("Resend transactional delivery failed")
       throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "Transactional email delivery failed.")
     }
 

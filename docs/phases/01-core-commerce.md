@@ -276,3 +276,8 @@ Before production completion, client must confirm:
 ## Phase 1 gate
 
 Phase 1 is complete only when a customer can browse, search/filter, select a pack variant, add it to cart, authenticate as required, complete a test checkout through the selected real provider integration, receive confirmation, and later view the order in their account.
+
+
+## Parts 1.6–1.8 implementation handoff
+
+Account and checkout code plus local regression coverage are supplied. The deployed Phase 1 gate above remains open until native database and real-provider staging acceptance passes. See [setup and acceptance checks](../phase-1-account-checkout.md) and [verification results](../phase-1-verification.md).

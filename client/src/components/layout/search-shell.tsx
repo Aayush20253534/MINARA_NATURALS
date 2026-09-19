@@ -1,31 +1,34 @@
 "use client";
-
+import { useId } from "react";
 import { SearchIcon } from "@/components/ui/icons";
-
-export function SearchShell({ compact = false }: { compact?: boolean }) {
+export function SearchShell({ onSubmit }: { onSubmit?: () => void }) {
+  const id = useId();
   return (
     <form
-      className={`search-shell${compact ? " search-shell--compact" : ""}`}
+      className="search-shell"
       role="search"
-      action="/shop"
+      action="/search"
       method="get"
+      onSubmit={onSubmit}
     >
       <SearchIcon />
-      <label className="sr-only" htmlFor={compact ? "mobile-search" : "site-search"}>
-        Search MINARA
+      <label className="sr-only" htmlFor={id}>
+        Search products
       </label>
       <input
-        id={compact ? "mobile-search" : "site-search"}
+        id={id}
+        type="search"
         name="q"
-        placeholder="Search groceries, spices, pickles…"
+        maxLength={120}
+        placeholder="Try “mango pickle” or “rice”"
         autoComplete="off"
       />
       <button
-        className="search-shell__hint"
+        className="search-shell__submit"
         type="submit"
-        style={{ border: 0, cursor: "pointer" }}
+        aria-label="Search"
       >
-        Search
+        Search <span aria-hidden="true">↗</span>
       </button>
     </form>
   );

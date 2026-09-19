@@ -2,13 +2,14 @@ export const siteConfig = {
   name: "MINARA NATURALS",
   tagline: "Freshness · Quality · Trust",
   description:
-    "A modern MINARA NATURALS commerce experience for fresh produce, groceries, spices, pickles, pooja essentials, household goods and business partnerships.",
+    "Fresh produce, pantry staples, signature MINARA pickles and everyday essentials. Discover something good for your home.",
   nav: [
-    { label: "Shop", href: "/shop" },
+    { label: "All products", href: "/shop" },
+    { label: "Fresh produce", href: "/category/fresh-produce" },
+    { label: "MINARA Pickles", href: "/category/minara-pickles" },
+    { label: "Pooja Samagri", href: "/category/pooja-samagri" },
     { label: "Our Story", href: "/#story" },
-    { label: "Bulk & Wholesale", href: "/#business" },
-    { label: "Export", href: "/#business" },
-    { label: "Franchise", href: "/#business" },
+    { label: "Business & partnerships", href: "/#business" },
   ],
 } as const;
 

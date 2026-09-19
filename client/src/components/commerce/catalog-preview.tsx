@@ -1,87 +1,117 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/layout/container";
-import { ArrowIcon, LeafIcon } from "@/components/ui/icons";
-import type { CatalogCategory } from "@/lib/catalog";
+import { ArrowIcon } from "@/components/ui/icons";
+import {
+  catalogProductImage,
+  type CatalogCategory,
+  type CatalogProduct,
+} from "@/lib/catalog";
+import { CategoryGlyph } from "./category-glyph";
 import styles from "./catalog-preview.module.css";
-
-const categoryCopy: Record<string, { note: string; tone: string }> = {
-  "fresh-produce": { note: "Fruit & vegetables", tone: "fresh" },
-  groceries: { note: "Everyday pantry", tone: "grain" },
-  spices: { note: "Kitchen essentials", tone: "spice" },
-  "minara-pickles": { note: "Signature range", tone: "pickle" },
-  "pooja-samagri": { note: "Ritual essentials", tone: "pooja" },
-  "household-personal-care": { note: "Daily-use essentials", tone: "home" },
+const copy: Record<string, string> = {
+  "fresh-produce": "Fresh for your table",
+  groceries: "Pantry, well stocked",
+  spices: "A little more flavour",
+  "minara-pickles": "Meet your mealtime favourites",
+  "pooja-samagri": "For your daily rituals",
+  "household-personal-care": "Care for every day",
 };
-
-function CategoryCard({ category, index }: { category: CatalogCategory; index: number }) {
-  const presentation = categoryCopy[category.handle] ?? {
-    note: `${category.category_children?.length ?? 0} collections`,
-    tone: "fresh",
-  };
-
-  return (
-    <Link
-      className={`${styles.categoryCard} ${styles[`tone_${presentation.tone}`]}`}
-      href={`/category/${category.handle}`}
-      aria-label={`Shop ${category.name}`}
-    >
-      <div className={styles.categoryTopline}>
-        <span>{String(index + 1).padStart(2, "0")}</span>
-        <span>{category.category_children?.length ?? 0} collections</span>
-      </div>
-      <div className={styles.categoryArtwork} aria-hidden="true">
-        <span className={styles.categoryOrb} />
-        <span className={styles.categoryLeaf} />
-      </div>
-      <div className={styles.categoryCopy}>
-        <span>{presentation.note}</span>
-        <h3>{category.name}</h3>
-        <div className={styles.categoryAction}>
-          Explore assortment <ArrowIcon width={15} height={15} />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 export function CatalogPreview({
   categories,
+  products,
   connected,
 }: {
   categories: CatalogCategory[];
+  products: CatalogProduct[];
   connected: boolean;
 }) {
+  const roots = categories.filter((c) => !c.parent_category_id).slice(0, 6);
+  function categoryImage(root: CatalogCategory) {
+    const ids = new Set([root.id]);
+    for (let changed = true; changed;) {
+      changed = false;
+      for (const c of categories)
+        if (
+          c.parent_category_id &&
+          ids.has(c.parent_category_id) &&
+          !ids.has(c.id)
+        ) {
+          ids.add(c.id);
+          changed = true;
+        }
+    }
+    const product = products.find(
+      (p) => p.categories?.some((c) => ids.has(c.id)) && catalogProductImage(p),
+    );
+    return product ? catalogProductImage(product) : null;
+  }
   return (
-    <section className={styles.catalogSection} id="categories">
+    <section className={styles.section} id="categories">
       <Container>
-        <div className={styles.headingRow}>
+        <div className={styles.heading}>
           <div>
-            <p className="eyebrow">Shop by category</p>
-            <h2>Start with what your home needs today.</h2>
+            <p className="eyebrow">Find your everyday</p>
+            <h2>What’s on your list?</h2>
           </div>
-          <p>
-            Fresh produce, pantry staples, MINARA specialities and daily-care
-            essentials, organised into a catalogue that stays easy to browse.
-          </p>
+          <Link href="/shop">
+            Browse everything <ArrowIcon width={17} height={17} />
+          </Link>
         </div>
-
-        {categories.length ? (
-          <div className={styles.categoryGrid}>
-            {categories.map((category, index) => (
-              <CategoryCard category={category} index={index} key={category.id} />
-            ))}
+        {roots.length ? (
+          <div className={styles.grid}>
+            {roots.map((category) => {
+              const image = categoryImage(category);
+              return (
+                <Link
+                  className={styles.card}
+                  href={`/category/${category.handle}`}
+                  key={category.id}
+                >
+                  <div className={styles.art} data-category={category.handle}>
+                    {image ? (
+                      <Image
+                        src={image}
+                        alt=""
+                        fill
+                        sizes="(max-width: 560px) 42vw, (max-width: 1000px) 28vw, 180px"
+                        className={styles.image}
+                      />
+                    ) : (
+                      <CategoryGlyph
+                        handle={category.handle}
+                        width={54}
+                        height={66}
+                      />
+                    )}
+                  </div>
+                  <h3>{category.name}</h3>
+                  <p>{copy[category.handle] ?? "Explore the collection"}</p>
+                  <span className={styles.arrow} aria-hidden="true">
+                    ↗
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         ) : (
-          <div className={styles.emptyState}>
-            <LeafIcon width={24} height={24} />
+          <div className={styles.empty} role="status">
             <div>
-              <strong>Catalogue categories are being prepared.</strong>
-              <span>
+              <strong>
                 {connected
-                  ? "No root categories are published yet."
-                  : "The commerce API is temporarily unavailable."}
-              </span>
+                  ? "Good things are on their way."
+                  : "Our shelves are taking a little longer to load."}
+              </strong>
+              <p>
+                {connected
+                  ? "Our collection is being prepared. Please check back soon."
+                  : "Please try the shop again in a moment."}
+              </p>
             </div>
+            <Link className="link-button link-button--secondary" href="/shop">
+              {connected ? "Visit the shop" : "Try the shop again"}
+              <ArrowIcon width={17} height={17} />
+            </Link>
           </div>
         )}
       </Container>

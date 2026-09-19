@@ -35,8 +35,8 @@ export function renderMinaraEmail(template: string, data: TemplateData = {}) {
     },
     "order-placed": {
       subject: reference ? `Order received · ${reference}` : "We received your order",
-      text: `Hello ${name}. We received your MINARA NATURALS order${reference ? ` ${reference}` : ""}.`,
-      html: layout("We received your order", `<p>Hello ${name},</p><p>Thank you. Your MINARA NATURALS order${reference ? ` <strong>${reference}</strong>` : ""} has been received.</p>`),
+      text: `Hello ${name}. We received your MINARA NATURALS order${reference ? ` ${reference}` : ""}.${data.action_url ? ` View your order: ${String(data.action_url)}` : ""}`,
+      html: layout("We received your order", `<p>Hello ${name},</p><p>Thank you. Your MINARA NATURALS order${reference ? ` <strong>${reference}</strong>` : ""} has been received.</p>${actionUrl ? `<p><a href="${actionUrl}" style="color:#14532d;font-weight:700">View your order and delivery updates</a></p>` : ""}`),
     },
     "email-verification": {
       subject: "Verify your MINARA NATURALS email",
@@ -45,8 +45,8 @@ export function renderMinaraEmail(template: string, data: TemplateData = {}) {
     },
     "password-reset": {
       subject: "Reset your MINARA NATURALS password",
-      text: `Reset your password${actionUrl ? `: ${actionUrl}` : "."}`,
-      html: layout("Reset your password", `<p>Hello ${name},</p><p>A password reset was requested for your account.</p>${actionUrl ? `<p><a href="${actionUrl}" style="color:#14532d;font-weight:700">Reset password</a></p>` : ""}`),
+      text: `Reset your password${data.action_url ? `: ${String(data.action_url)}` : "."}. This link expires after 15 minutes and works once. If you did not request this, ignore this email.`,
+      html: layout("Reset your password", `<p>Hello ${name},</p><p>A password reset was requested for your account. This link expires after 15 minutes and works once. If you did not request this, you can ignore this email.</p>${actionUrl ? `<p><a href="${actionUrl}" style="color:#14532d;font-weight:700">Reset password</a></p>` : ""}`),
     },
     "user-invited": {
       subject: "You have been invited to MINARA NATURALS",

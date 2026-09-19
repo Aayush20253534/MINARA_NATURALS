@@ -1,14 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowIcon, LeafIcon } from "@/components/ui/icons";
+import { ArrowIcon } from "@/components/ui/icons";
 import {
   catalogProductImage,
   formatCatalogPrice,
   getCatalogStockState,
   type CatalogProduct,
 } from "@/lib/catalog";
+import { ProductImage } from "./product-image";
 import styles from "./product-card.module.css";
-
 export function ProductCard({
   product,
   priority = false,
@@ -16,52 +15,47 @@ export function ProductCard({
   product: CatalogProduct;
   priority?: boolean;
 }) {
-  const metadata = product.metadata ?? {};
-  const image = catalogProductImage(product);
-  const price = formatCatalogPrice(product);
   const stock = getCatalogStockState(product);
-  const category = product.categories?.[0]?.name ?? "MINARA catalogue";
-  const badge = typeof metadata.badge === "string" ? metadata.badge : null;
-  const packs = [...new Set((product.variants ?? []).map((variant) => variant.title))].slice(0, 3);
-
+  const packs = [...new Set((product.variants ?? []).map((v) => v.title))];
+  const brand =
+    typeof product.metadata?.brand === "string" &&
+    product.metadata.brand !== "Catalogue Sample"
+      ? product.metadata.brand
+      : product.categories?.[0]?.name;
   return (
-    <Link className={styles.card} href={`/product/${product.handle}`}>
+    <Link
+      className={styles.card}
+      href={`/product/${encodeURIComponent(product.handle)}`}
+    >
       <div className={styles.visual}>
-        {image ? (
-          <Image
-            src={image}
-            alt={product.title}
-            fill
-            priority={priority}
-            sizes="(max-width: 640px) 88vw, (max-width: 980px) 45vw, 280px"
-            className={styles.image}
-          />
-        ) : (
-          <div className={styles.placeholder} aria-hidden="true">
-            <LeafIcon width={34} height={34} />
-            <strong>MINARA</strong>
-          </div>
+        <ProductImage
+          src={catalogProductImage(product)}
+          alt={product.title}
+          priority={priority}
+        />
+        {product.metadata?.minara_owned === true && (
+          <span className={styles.badge}>MINARA selection</span>
         )}
-        {badge && <span className={styles.badge}>{badge}</span>}
-        <span className={`${styles.stock} ${styles[`stock_${stock.state}`]}`}>
-          {stock.label}
-        </span>
+        {stock.state === "out" && (
+          <span className={styles.stock}>Out of stock</span>
+        )}
       </div>
       <div className={styles.body}>
-        <div className={styles.meta}>
-          <span>{category}</span>
-          <span>{packs.join(" · ") || "Standard pack"}</span>
-        </div>
+        <p className={styles.brand}>{brand ?? "Everyday essentials"}</p>
         <h3>{product.title}</h3>
+        <p className={styles.packs}>
+          {packs.slice(0, 3).join(" · ") || "See product details"}
+          {packs.length > 3 ? ` +${packs.length - 3}` : ""}
+        </p>
         <div className={styles.footer}>
-          <div>
-            <small>Price</small>
-            <strong>{price ?? "View product"}</strong>
-          </div>
+          <strong>{formatCatalogPrice(product) ?? "Price unavailable"}</strong>
           <span className={styles.arrow} aria-hidden="true">
             <ArrowIcon width={17} height={17} />
           </span>
         </div>
+        <span className={styles.view}>
+          View product <span aria-hidden="true">↗</span>
+        </span>
       </div>
     </Link>
   );
