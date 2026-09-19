@@ -4,11 +4,11 @@ export const siteConfig = {
   description:
     "A modern MINARA NATURALS commerce experience for fresh produce, groceries, spices, pickles, pooja essentials, household goods and business partnerships.",
   nav: [
-    { label: "Shop", href: "#categories" },
-    { label: "Our Story", href: "#story" },
-    { label: "Bulk & Wholesale", href: "#business" },
-    { label: "Export", href: "#business" },
-    { label: "Franchise", href: "#business" },
+    { label: "Shop", href: "/shop" },
+    { label: "Our Story", href: "/#story" },
+    { label: "Bulk & Wholesale", href: "/#business" },
+    { label: "Export", href: "/#business" },
+    { label: "Franchise", href: "/#business" },
   ],
 } as const;
 

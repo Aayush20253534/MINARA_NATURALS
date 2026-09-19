@@ -7,12 +7,36 @@ export function SiteFooter() {
     <footer className="site-footer">
       <Container>
         <div className="site-footer__top">
-          <div className="site-footer__brand"><Wordmark inverse /><p>A scalable commerce home for MINARA NATURALS retail, wholesale, export and franchise experiences.</p></div>
-          <div className="footer-column"><strong>Shop</strong><Link href="#categories">Categories</Link><Link href="#categories">MINARA Pickles</Link><Link href="#categories">Pooja Samagri</Link></div>
-          <div className="footer-column"><strong>Business</strong><Link href="#business">Bulk & Wholesale</Link><Link href="#business">Export</Link><Link href="#business">Franchise Partner</Link></div>
-          <div className="footer-column"><strong>Company</strong><Link href="#story">Our Story</Link><span>Customer support</span><span>Policies</span></div>
+          <div className="site-footer__brand">
+            <Wordmark inverse />
+            <p>
+              Everyday essentials, MINARA specialities and dedicated business
+              journeys in one considered commerce experience.
+            </p>
+          </div>
+          <div className="footer-column">
+            <strong>Shop</strong>
+            <Link href="/shop">All products</Link>
+            <Link href="/category/minara-pickles">MINARA Pickles</Link>
+            <Link href="/category/pooja-samagri">Pooja Samagri</Link>
+          </div>
+          <div className="footer-column">
+            <strong>Business</strong>
+            <Link href="/#business">Bulk & Wholesale</Link>
+            <Link href="/#business">Export</Link>
+            <Link href="/#business">Franchise Partner</Link>
+          </div>
+          <div className="footer-column">
+            <strong>Company</strong>
+            <Link href="/#story">Our Story</Link>
+            <span>Customer support</span>
+            <span>Policies</span>
+          </div>
         </div>
-        <div className="site-footer__bottom"><span>© {new Date().getFullYear()} MINARA NATURALS</span><span>Freshness · Quality · Trust</span></div>
+        <div className="site-footer__bottom">
+          <span>© {new Date().getFullYear()} MINARA NATURALS</span>
+          <span>Freshness · Quality · Trust</span>
+        </div>
       </Container>
     </footer>
   );
