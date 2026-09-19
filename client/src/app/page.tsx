@@ -1,18 +1,13 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ArrowIcon, GlobeIcon, LeafIcon, PackageIcon, StoreIcon } from "@/components/ui/icons";
+import { CatalogPreview } from "@/components/commerce/catalog-preview";
 import { Container } from "@/components/layout/container";
 import { Section } from "@/components/layout/section";
+import { getCatalogPreview } from "@/lib/catalog";
 import { getFoundationConnection } from "@/lib/medusa";
 
-const categories = [
-  { name: "Fresh Produce", note: "Fruit & vegetables", tone: "fresh", glyph: "01" },
-  { name: "Groceries", note: "Everyday pantry", tone: "grain", glyph: "02" },
-  { name: "Spices", note: "Kitchen essentials", tone: "spice", glyph: "03" },
-  { name: "MINARA Pickles", note: "Signature range", tone: "pickle", glyph: "04" },
-  { name: "Pooja Samagri", note: "Ritual essentials", tone: "pooja", glyph: "05" },
-  { name: "Home & Personal Care", note: "Daily-use essentials", tone: "home", glyph: "06" },
-] as const;
+export const dynamic = "force-dynamic";
 
 const business = [
   { icon: PackageIcon, eyebrow: "For retailers & hospitality", title: "Bulk & Wholesale", copy: "A dedicated requirement path for retailers, hotels and distributors, separated from normal consumer checkout." },
@@ -21,7 +16,10 @@ const business = [
 ] as const;
 
 export default async function Home() {
-  const connection = process.env.NODE_ENV === "development" ? await getFoundationConnection() : null;
+  const [catalog, connection] = await Promise.all([
+    getCatalogPreview(),
+    process.env.NODE_ENV === "development" ? getFoundationConnection() : Promise.resolve(null),
+  ]);
 
   return (
     <>
@@ -33,7 +31,7 @@ export default async function Home() {
             <h1>Everyday essentials,<br/><em>from local sources to your home.</em></h1>
             <p className="hero-lead">A modern home for fresh produce, groceries, spices, MINARA pickles, pooja essentials and the products families reach for every day.</p>
             <div className="hero-actions"><Link className="link-button link-button--primary" href="#categories">Explore categories <ArrowIcon /></Link><Link className="link-button link-button--secondary" href="#story">Discover MINARA</Link></div>
-            <div className="hero-trust"><span><i>✓</i> Retail-ready catalogue</span><span><i>✓</i> Multiple pack sizes</span><span><i>✓</i> Business & franchise journeys</span></div>
+            <div className="hero-trust"><span><i>✓</i> Inventory-aware catalogue</span><span><i>✓</i> Multiple pack sizes</span><span><i>✓</i> Business & franchise journeys</span></div>
           </div>
           <div className="hero-art" aria-label="MINARA product category illustration">
             <div className="hero-art__halo" />
@@ -44,12 +42,11 @@ export default async function Home() {
         </Container>
       </Section>
 
-      <Section className="category-section" id="categories">
-        <Container>
-          <div className="section-heading"><div><p className="eyebrow">Shop by category</p><h2>Built around the way people actually shop.</h2></div><p>Category architecture is established now; real catalogue data, product imagery, filters and search are connected in Phase 1.</p></div>
-          <div className="category-grid">{categories.map((category) => <article className={`category-card category-card--${category.tone}`} key={category.name}><div className="category-card__number">{category.glyph}</div><div className="category-card__shape" aria-hidden="true"/><div className="category-card__copy"><span>{category.note}</span><h3>{category.name}</h3><span className="category-card__action">Explore <ArrowIcon width={16} height={16}/></span></div></article>)}</div>
-        </Container>
-      </Section>
+      <CatalogPreview
+        categories={catalog.categories}
+        products={catalog.products}
+        connected={catalog.connected}
+      />
 
       <Section className="story-section" id="story">
         <Container className="story-grid">
@@ -65,7 +62,7 @@ export default async function Home() {
         </Container>
       </Section>
 
-      {connection && <Section className="dev-status"><Container><div className="dev-status__panel"><strong>Phase 0 connection check</strong><span className={connection.backendReachable ? "is-ok" : ""}>API {connection.backendReachable ? "reachable" : "not reachable"}</span><span className={connection.publishableKeyConfigured ? "is-ok" : ""}>Publishable key {connection.publishableKeyConfigured ? "configured" : "missing"}</span><span className={connection.storeApiReachable ? "is-ok" : ""}>Store API {connection.storeApiReachable ? "reachable" : "not verified"}</span></div></Container></Section>}
+      {connection && <Section className="dev-status"><Container><div className="dev-status__panel"><strong>Phase 1.1 connection check</strong><span className={connection.backendReachable ? "is-ok" : ""}>API {connection.backendReachable ? "reachable" : "not reachable"}</span><span className={connection.publishableKeyConfigured ? "is-ok" : ""}>Publishable key {connection.publishableKeyConfigured ? "configured" : "missing"}</span><span className={connection.storeApiReachable ? "is-ok" : ""}>Store API {connection.storeApiReachable ? "reachable" : "not verified"}</span></div></Container></Section>}
     </>
   );
 }
