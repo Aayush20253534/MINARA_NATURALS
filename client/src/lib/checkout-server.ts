@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { storeRequest, StoreError } from "./customer-server";
 import type { CheckoutCart, ShippingOption } from "./checkout";
-export const providerId = "pp_razorpay_razorpay";
+export const providerId = "pp_cashfree_cashfree";
 const fields =
   "id,customer_id,region_id,completed_at,email,currency_code,subtotal,item_subtotal,shipping_subtotal,discount_subtotal,credit_line_total,shipping_total,tax_total,discount_total,total,*items,*shipping_address,*billing_address,*shipping_methods,*payment_collection,*payment_collection.payment_sessions";
 export async function checkoutCart() {

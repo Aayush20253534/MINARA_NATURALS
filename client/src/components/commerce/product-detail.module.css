@@ -530,3 +530,114 @@
     font-size: 29px;
   }
 }
+/* Product pages inherit the lighter green/gold direction and tighter spacing. */
+.page {
+  padding: 22px 0 56px;
+}
+.productGrid {
+  gap: 54px;
+}
+.gallery {
+  top: 145px;
+}
+.mainImage {
+  border-color: #e1e8dd;
+  background: #f7faf3;
+}
+.info h1 {
+  color: var(--minara-green-950);
+}
+.pack:has(input:checked) {
+  border-color: var(--minara-green-700);
+  background: var(--minara-green-50);
+}
+.addButton {
+  background: var(--minara-green-800);
+  border-color: var(--minara-green-800);
+}
+.addButton:hover {
+  background: var(--minara-green-900);
+}
+.related {
+  background: #f8faf4;
+}
+
+@media (max-width: 800px) {
+  .gallery {
+    top: auto;
+  }
+  .page {
+    padding-top: 16px;
+  }
+}
+
+/* PDP polish: product is the hero, controls stay calm and tactile. */
+.mainImage {
+  border-radius: 18px;
+  border-color: #dfe8da;
+  background:
+    radial-gradient(circle at 50% 14%, #ffffff 0 14%, transparent 50%),
+    #f4f8f0;
+  box-shadow: 0 18px 55px #245b380d;
+}
+.zoomHint {
+  border: 1px solid #dfe7da;
+  border-radius: 999px;
+  box-shadow: 0 5px 18px #245b380c;
+}
+.info {
+  padding: 27px 28px 28px;
+  border: 1px solid #e0e8dc;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 16px 45px #245b3809;
+}
+.info h1 {
+  margin-top: 12px;
+}
+.pack {
+  min-width: 94px;
+  border-radius: 10px;
+  border-color: #d9e4d4;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.pack:hover:not([data-unavailable="true"]) {
+  transform: translateY(-1px);
+  border-color: #aecaA4;
+  background: #fbfdf9;
+}
+.addButton {
+  border-radius: 11px;
+  box-shadow: 0 9px 22px #245b3815;
+}
+.quantity {
+  border-radius: 10px;
+}
+.details details {
+  border-color: #e3e9de;
+}
+.related {
+  background: linear-gradient(180deg, #f7faf3, #fffdf8);
+}
+.thumbnails button {
+  border-radius: 9px;
+}
+
+@media (max-width: 800px) {
+  .info {
+    padding: 22px 20px 24px;
+  }
+  .mainImage {
+    border-radius: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .info {
+    padding: 18px 16px 20px;
+    border-radius: 14px;
+  }
+  .purchaseBar {
+    gap: 8px;
+  }
+}

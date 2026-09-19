@@ -24,7 +24,7 @@ export function customerFixture({carts,products,json,totals}){
   }
   if(url.pathname==="/store/minara/wishlist"){if(!customer){deny();return true;}const saved=wishlists.get(customer.id)||new Set();wishlists.set(customer.id,saved);if(req.method==="POST"){if(body.saved)saved.add(body.product_id);else saved.delete(body.product_id);json(res,{saved:body.saved});}else json(res,{products:products.filter(p=>saved.has(p.id))});return true;}
   if(url.pathname==="/store/minara/checkout"){json(res,{enabled});return true;}
-  if(url.pathname==="/store/payment-providers"){json(res,{payment_providers:[{id:"pp_razorpay_razorpay"}]});return true;}
+  if(url.pathname==="/store/payment-providers"){json(res,{payment_providers:[{id:"pp_cashfree_cashfree"}]});return true;}
   if(url.pathname.startsWith("/store/orders")){if(!customer){deny();return true;}const id=url.pathname.split("/")[3];if(id){const order=orders.get(id);if(!order||order.customer_id!==customer.id)json(res,{},404);else json(res,{order});}else{const all=[...orders.values()].filter(o=>o.customer_id===customer.id);json(res,{orders:all.slice(Number(url.searchParams.get("offset"))||0,10),count:all.length});}return true;}
   if(url.pathname==="/store/shipping-options"){json(res,{shipping_options:shipping?[{id:"so_standard",name:"Standard delivery",amount:49,price_type:"flat",type:{description:"Tracked delivery"}}]:[]});return true;}
   if(url.pathname.startsWith("/store/payment-collections")){
@@ -32,7 +32,7 @@ export function customerFixture({carts,products,json,totals}){
    const id=url.pathname.split("/")[3];const cart=id?[...carts.values()].find(c=>c.payment_collection?.id===id):carts.get(body.cart_id);
    if(!cart||cart.customer_id!==customer.id){json(res,{},404);return true;}
    if(!id)cart.payment_collection={id:`pay_col_${randomUUID()}`,payment_sessions:[]};
-   else if(!cart.payment_collection.payment_sessions.length)cart.payment_collection.payment_sessions.push({id:`payses_${randomUUID()}`,provider_id:body.provider_id,status:"pending",data:{order_id:`order_${randomUUID().replaceAll("-","")}`,amount:Math.round(cart.total*100),currency:"INR",key_id:"rzp_test_fixture"}});
+   else if(!cart.payment_collection.payment_sessions.length)cart.payment_collection.payment_sessions.push({id:`payses_${randomUUID()}`,provider_id:body.provider_id,status:"pending",data:{order_id:`mn_${randomUUID().replaceAll("-","").slice(0,32)}`,amount:cart.total,currency:"INR",payment_session_id:`session_${randomUUID().replaceAll("-","")}`,mode:"sandbox"}});
    json(res,{payment_collection:cart.payment_collection});return true;
   }
   const match=url.pathname.match(/^\/store\/carts\/(cart_[\w-]+)(?:\/(.*))?$/);

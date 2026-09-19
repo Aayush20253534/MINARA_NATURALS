@@ -19,38 +19,40 @@ import {
   Totals,
 } from "./account-client";
 import s from "./account.module.css";
-type RazorpayOptions = {
-  key: string;
-  amount: number;
-  currency: string;
-  order_id: string;
-  name: string;
-  description: string;
-  prefill: { name: string; email: string; contact: string };
-  theme: { color: string };
-  handler: () => void;
-  modal: { ondismiss: () => void };
+type CashfreeResult = {
+  error?: { message?: string; code?: string };
+  paymentDetails?: unknown;
+  redirect?: boolean;
+};
+type CashfreeSdk = {
+  checkout: (options: {
+    paymentSessionId: string;
+    redirectTarget: "_modal";
+  }) => Promise<CashfreeResult>;
 };
 declare global {
   interface Window {
-    Razorpay?: new (options: RazorpayOptions) => {
-      open: () => void;
-      on: (name: string, handler: () => void) => void;
-    };
+    Cashfree?: (options: { mode: "sandbox" | "production" }) => CashfreeSdk;
   }
 }
 let gatewayScript: Promise<void> | undefined;
 function loadGateway() {
-  if (window.Razorpay) return Promise.resolve();
+  if (window.Cashfree) return Promise.resolve();
   if (!gatewayScript)
     gatewayScript = new Promise<void>((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
       script.async = true;
-      const timeout = window.setTimeout(() => { gatewayScript = undefined; script.remove(); reject(new Error("The payment window took too long to load. Please try again.")); }, 30000);
+      const timeout = window.setTimeout(() => {
+        gatewayScript = undefined;
+        script.remove();
+        reject(
+          new Error("The payment window took too long to load. Please try again."),
+        );
+      }, 30000);
       script.onload = () => {
         window.clearTimeout(timeout);
-        if (window.Razorpay) resolve();
+        if (window.Cashfree) resolve();
         else {
           gatewayScript = undefined;
           reject(new Error("Payment window is unavailable."));
@@ -165,56 +167,32 @@ export function Checkout() {
           );
           return;
         } catch {
-          /* Native authorization remains pending; reopening the same Razorpay order cannot double-pay it. */
+          /* Native authorization remains pending; reopening the same Cashfree order reuses the same payment session. */
         }
       }
       await loadGateway();
       const payment = await clientRequest<{
         order_id: string;
-        amount: number;
-        currency: string;
-        key_id: string;
+        payment_session_id: string;
+        mode: "sandbox" | "production";
       }>("/api/checkout", { action: "payment" });
       await refresh();
-      let submitted = false;
-      const checkout = new window.Razorpay!({
-        key: payment.key_id,
-        amount: payment.amount,
-        currency: payment.currency,
-        order_id: payment.order_id,
-        name: "MINARA NATURALS",
-        description: "Your everyday essentials",
-        prefill: {
-          name: `${state!.customer.first_name} ${state!.customer.last_name}`,
-          email: state!.customer.email,
-          contact: state!.cart?.shipping_address?.phone || "",
-        },
-        theme: { color: "#123d2a" },
-        handler: () => {
-          if (submitted) return;
-          submitted = true;
-          active.current = false;
-          void complete();
-        },
-        modal: {
-          ondismiss: () => {
-            if (submitted) return;
-            active.current = false;
-            setPending("");
-            setMessage(
-              "Payment window closed. If you were charged, check payment status below. Otherwise, resume the same payment when you’re ready.",
-            );
-            void refresh().catch(() => {});
-          },
-        },
-      });
-      checkout.on("payment.failed", () => {
-        setError(
-          "Payment was not completed. You can retry in the payment window, or close it and check payment status below.",
-        );
-      });
-      checkout.open();
+      const cashfree = window.Cashfree!({ mode: payment.mode });
       setPending("payment");
+      const result = await cashfree.checkout({
+        paymentSessionId: payment.payment_session_id,
+        redirectTarget: "_modal",
+      });
+      active.current = false;
+      if (result?.error) {
+        setPending("");
+        setMessage(
+          "Payment window closed or payment was not completed. If you were charged, check payment status below. Otherwise, resume the same payment when you’re ready.",
+        );
+        await refresh().catch(() => {});
+        return;
+      }
+      await complete();
     } catch (e) {
       active.current = false;
       setPending("");
@@ -406,10 +384,10 @@ export function Checkout() {
             <h2 className={s.step}>
               <span>4</span> Payment
             </h2>
-            <h3>Pay securely with Razorpay</h3>
+            <h3>Pay securely with Cashfree</h3>
             <p className={s.subtle}>
-              Choose from the payment methods available in the secure payment
-              window. Payment details stay with Razorpay.
+              Choose from the payment methods available in the secure Cashfree
+              checkout. Payment details stay with Cashfree.
             </p>
             <p className={s.subtle}>
               Review your items, address and total before continuing. Once

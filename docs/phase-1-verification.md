@@ -15,7 +15,7 @@ Verified locally on 19 September 2026, on top of the parts 1.4–1.5 patch.
 | Browser JavaScript errors during the audit | 0 | Same audited views |
 | Responsive layout | No horizontal overflow in audited widths | Checkout at 320/390/768px; existing product/cart/catalogue regression also covers 1024/1440px |
 | Native database integration | Not executed in this environment | Requires runnable isolated PostgreSQL; checked-in CI provides it |
-| Real Razorpay/Resend staging transaction | Not executed | Merchant credentials, delivery/tax configuration and controlled inbox are required |
+| Real Cashfree/Resend staging transaction | Not executed | Merchant credentials are intentionally optional while `CHECKOUT_ENABLED=false`; delivery/tax configuration and a controlled inbox are still required before enabling checkout |
 
 ## Regression fixes made during review
 
@@ -31,10 +31,10 @@ Verified locally on 19 September 2026, on top of the parts 1.4–1.5 patch.
 
 Production-build, local Chromium observations on a fixture backend were collected with `PerformanceObserver`. Representative observed LCP values were 92ms for home, 56ms for shop, 52ms for PDP, 48ms for mobile login and 104ms for checkout. Observed CLS was zero except a negligible checkout shift of approximately 0.0000024.
 
-These are warm/local diagnostic observations without mobile CPU or network throttling. They are **not Lighthouse scores or field Core Web Vitals evidence**. Real Cloudinary images, the deployed backend, Razorpay loading and field INP still need the deployed performance review. Razorpay’s script loads only when the shopper starts payment.
+These are warm/local diagnostic observations without mobile CPU or network throttling. They are **not Lighthouse scores or field Core Web Vitals evidence**. Real Cloudinary images, the deployed backend, Cashfree loading and field INP still need the deployed performance review. Cashfree’s SDK loads only when the shopper starts payment.
 
 The local Next.js server logged aborted-stream messages during rapid navigation and hard session transitions. The broken-image regression also intentionally logs an invalid-image response. Browser assertions passed and the separate visual audit recorded no page JavaScript errors.
 
 ## Phase 1 gate
 
-Implementation and local regression work are delivered; the production gate remains open. Run the native PostgreSQL suites and the real-provider staging checklist in `docs/phase-1-account-checkout.md`. In particular, verify migration application, actual email receipt, serviceability/tax configuration, stock conflicts after payment, duplicate signed webhooks and refund reconciliation before enabling checkout for customers.
+Implementation and local regression work are delivered; the production gate remains open. Run the native PostgreSQL suites and the real-provider staging checklist in `docs/phase-1-account-checkout.md`. Cashfree credentials are not required while `CHECKOUT_ENABLED=false`; only add them when preparing the sandbox checkout gate. Before customer activation, verify migration application, actual email receipt, serviceability/tax configuration, stock conflicts after payment, duplicate signed Cashfree webhooks and refund reconciliation.

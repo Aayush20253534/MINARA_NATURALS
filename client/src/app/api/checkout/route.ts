@@ -164,16 +164,16 @@ export async function POST(request: Request) {
           503,
           "Payment could not be opened. Please try again.",
         );
-      // Public checkout configuration only. Secrets and customer session tokens never leave the server.
-      const { order_id, amount, currency, key_id } = session.data;
+      // Public Cashfree checkout data only. Merchant credentials never leave the backend.
+      const { order_id, payment_session_id, mode, currency } = session.data;
       if (
         typeof order_id !== "string" ||
-        typeof amount !== "number" ||
-        typeof key_id !== "string" ||
+        typeof payment_session_id !== "string" ||
+        (mode !== "sandbox" && mode !== "production") ||
         currency !== "INR"
       )
         throw new StoreError(503, "Payment configuration is unavailable.");
-      return privateJson({ order_id, amount, currency, key_id });
+      return privateJson({ order_id, payment_session_id, mode });
     }
     throw new StoreError(400, "Invalid checkout request.");
   } catch (e) {

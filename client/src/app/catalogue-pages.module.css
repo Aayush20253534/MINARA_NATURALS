@@ -78,3 +78,118 @@
   .productMedia { min-height: 390px; }
   .variantGrid { grid-template-columns: 1fr; }
 }
+/* Bring listing/category surfaces in line with the brighter storefront chrome. */
+.pageHero {
+  padding: 42px 0 32px;
+  background: #f8faf4;
+}
+.pageHero h1 {
+  color: var(--minara-green-950);
+  font-size: clamp(36px, 4.4vw, 60px);
+}
+.catalogue {
+  padding: 42px 0 80px;
+}
+.productPage {
+  padding: 40px 0 80px;
+  background: #f8faf4;
+}
+.productGrid {
+  gap: 52px;
+}
+.productMedia {
+  min-height: 600px;
+  border-color: #e1e8dd;
+  background: #f7faf3;
+}
+.productInfo h1 {
+  color: var(--minara-green-950);
+  font-size: clamp(38px, 4.6vw, 58px);
+}
+
+@media (max-width: 720px) {
+  .pageHero {
+    padding: 32px 0 26px;
+  }
+  .catalogue {
+    padding-top: 30px;
+  }
+  .productPage {
+    padding-top: 30px;
+  }
+  .productMedia {
+    min-height: 360px;
+  }
+}
+
+/* Catalogue surfaces: editorial heading + dense, premium product browsing. */
+.pageHero {
+  padding: 34px 0 28px;
+  background:
+    radial-gradient(circle at 78% 10%, #e0efd9 0 8%, transparent 28%),
+    linear-gradient(180deg, #f6f9f1, #fffdf8);
+}
+.pageHeroInner {
+  gap: 28px;
+}
+.pageHero h1 {
+  font-size: clamp(34px, 4vw, 54px);
+}
+.catalogue {
+  padding: 32px 0 72px;
+  background: #fdfcf8;
+}
+.catalogueBar {
+  margin-bottom: 18px;
+  padding: 10px 13px;
+  border: 1px solid #e1e8dc;
+  border-radius: 12px;
+  background: #fff;
+}
+.grid {
+  gap: 18px;
+}
+.empty {
+  min-height: 190px;
+  border-style: solid;
+  border-radius: 16px;
+  background: #f6faf3;
+}
+.productPage {
+  padding-top: 32px;
+  background: #fdfcf8;
+}
+.productMedia {
+  border-radius: 18px;
+  box-shadow: 0 18px 55px #245b380d;
+}
+.productInfo {
+  padding: 26px;
+  border: 1px solid #e0e8dc;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 16px 45px #245b3809;
+}
+.variantCard {
+  border-radius: 10px;
+  transition: border-color .18s ease, background .18s ease;
+}
+.variantCard:hover {
+  border-color: #bcd0b4;
+  background: #f8fbf5;
+}
+
+@media (max-width: 720px) {
+  .pageHero {
+    padding: 28px 0 22px;
+  }
+  .catalogue {
+    padding-top: 24px;
+  }
+  .catalogueBar {
+    align-items: flex-start;
+  }
+  .productInfo {
+    padding: 20px;
+  }
+}

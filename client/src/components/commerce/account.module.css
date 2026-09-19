@@ -476,3 +476,177 @@
 }
 
 .authForm > .subtle { margin-bottom: 24px; }
+
+/* Premium account entry: compact enough to fit above the fold on common laptops. */
+.page {
+  max-width: 1120px;
+  padding: 26px 20px 56px;
+}
+.auth {
+  grid-template-columns: minmax(340px, .88fr) minmax(440px, 1.12fr);
+  min-height: 0;
+  max-width: 1060px;
+  margin-inline: auto;
+  border-color: #dce7d8;
+  border-radius: 20px;
+  box-shadow: 0 22px 70px #245b3818;
+  background: #fff;
+}
+.story {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 38px 38px 34px;
+  background:
+    radial-gradient(circle at 82% 14%, #fff8d89e 0 12%, transparent 32%),
+    linear-gradient(145deg, #e7f3df 0%, #d5e9ca 55%, #c8e0bb 100%);
+  color: var(--minara-green-950);
+}
+.story::before,
+.story::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 999px;
+  border: 1px solid #ffffff8c;
+}
+.story::before {
+  width: 260px;
+  height: 260px;
+  right: -118px;
+  top: -110px;
+}
+.story::after {
+  width: 180px;
+  height: 180px;
+  left: -96px;
+  bottom: -98px;
+}
+.story h2 {
+  max-width: 360px;
+  margin: 16px 0 14px;
+  color: #174a31;
+  font-size: clamp(2rem, 3.2vw, 2.65rem);
+  line-height: 1.08;
+}
+.story p {
+  max-width: 340px;
+  margin: 0;
+  color: #4f6752;
+  line-height: 1.75;
+}
+.story :global(.eyebrow) {
+  color: #3f7650;
+  margin-top: 15px;
+}
+.story > a {
+  width: fit-content;
+  padding: 9px 14px;
+  border: 1px solid #9ebc91;
+  border-radius: 999px;
+  background: #ffffff80;
+  color: #205b39;
+  font-size: 12px;
+  font-weight: 750;
+  backdrop-filter: blur(8px);
+}
+.seal {
+  width: 52px;
+  height: 52px;
+  border-color: #8fb184;
+  background: #ffffff8a;
+  color: #1f633e;
+  font-size: 26px;
+  box-shadow: inset 0 0 0 5px #ffffff42;
+}
+.authForm {
+  padding: 34px 42px 32px;
+  background: linear-gradient(180deg, #ffffff 0%, #fffefb 100%);
+}
+.authForm h1 {
+  margin: 7px 0 8px;
+  font-size: clamp(1.7rem, 2.5vw, 2.15rem);
+}
+.authForm > .subtle {
+  max-width: 500px;
+  margin: 0 0 18px;
+  line-height: 1.65;
+}
+.form {
+  gap: 13px;
+}
+.form label {
+  gap: 6px;
+}
+.form input,
+.form select {
+  min-height: 44px;
+  border-color: #c9d7c2;
+  border-radius: 10px;
+  background: #fffefa;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.form input:focus,
+.form select:focus {
+  border-color: #6da46d;
+  background: #fff;
+  outline: 0;
+  box-shadow: 0 0 0 3px #6da46d1f;
+}
+.authForm .button {
+  min-height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--minara-green-800), var(--minara-green-900));
+  border-color: transparent;
+  box-shadow: 0 9px 22px #245b3817;
+}
+.authForm .actions {
+  margin-top: 13px;
+}
+.authForm .textLink {
+  min-height: 36px;
+}
+
+@media (max-width: 850px) {
+  .auth {
+    grid-template-columns: .82fr 1.18fr;
+  }
+  .story {
+    padding: 30px 26px;
+  }
+  .authForm {
+    padding: 30px 28px;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 18px 12px 44px;
+  }
+  .auth {
+    grid-template-columns: 1fr;
+    border-radius: 16px;
+  }
+  .story {
+    min-height: 132px;
+    padding: 22px 22px 20px;
+  }
+  .story h2 {
+    margin: 8px 0 0;
+    font-size: 1.65rem;
+  }
+  .story > a,
+  .story > div > p:not(:global(.eyebrow)) {
+    display: none;
+  }
+  .seal {
+    width: 42px;
+    height: 42px;
+    font-size: 22px;
+  }
+  .authForm {
+    padding: 24px 20px 22px;
+  }
+}

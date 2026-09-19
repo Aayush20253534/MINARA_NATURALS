@@ -54,6 +54,12 @@ services:
         sync: false
       - key: RESEND_REPLY_TO
         sync: false
+      - key: CHECKOUT_ENABLED
+        value: "false"
+      - key: CASHFREE_ENV
+        value: sandbox
+      - key: CASHFREE_API_VERSION
+        value: 2025-01-01
 
   - type: worker
     name: minara-commerce-worker
@@ -108,3 +114,9 @@ services:
         sync: false
       - key: RESEND_REPLY_TO
         sync: false
+      - key: CHECKOUT_ENABLED
+        value: "false"
+      - key: CASHFREE_ENV
+        value: sandbox
+      - key: CASHFREE_API_VERSION
+        value: 2025-01-01

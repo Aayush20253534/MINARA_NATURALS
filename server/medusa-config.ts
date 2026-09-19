@@ -25,13 +25,17 @@ const databaseUrl = requiredInProduction(
   "postgres://postgres:postgres@localhost:5432/minara"
 )
 const backendUrl = process.env.MEDUSA_BACKEND_URL?.trim() || "http://localhost:9000"
-const redisUrl = process.env.REDIS_URL?.trim()
+const configuredRedisUrl = process.env.REDIS_URL?.trim()
+// A stale remote Redis URL should not make local UI development unusable.
+// Production still requires Redis; local development opts in explicitly.
+const useRedisInDevelopment = process.env.USE_REDIS_IN_DEVELOPMENT === "true"
+const redisUrl = production || useRedisInDevelopment ? configuredRedisUrl : undefined
 const workerMode = (process.env.MEDUSA_WORKER_MODE?.trim() || "shared") as
   | "shared"
   | "server"
   | "worker"
 
-if (production && !redisUrl) {
+if (production && !configuredRedisUrl) {
   throw new MedusaError(
     MedusaError.Types.INVALID_DATA,
     "REDIS_URL is required in production so server and worker share infrastructure state"
@@ -79,25 +83,70 @@ if (redisUrl) {
   )
 }
 
-const paymentFields = ["RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "RAZORPAY_WEBHOOK_SECRET"]
-if (paymentFields.some(name => Boolean(process.env[name])) && !allPresent(paymentFields)) {
-  throw new MedusaError(MedusaError.Types.INVALID_DATA, "Razorpay configuration is incomplete")
-}
-if (allPresent(paymentFields)) modules.push({
-  resolve: "@medusajs/medusa/payment",
-  options: { providers: [{ resolve: "./src/modules/razorpay", id: "razorpay", options: {
-    key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET, webhook_secret: process.env.RAZORPAY_WEBHOOK_SECRET,
-  } }] },
-})
-if (process.env.CHECKOUT_ENABLED === "true" && (!allPresent(paymentFields) || !process.env.STOREFRONT_URL)) {
-  throw new MedusaError(MedusaError.Types.INVALID_DATA, "Checkout requires Razorpay and a canonical STOREFRONT_URL")
-}
+const checkoutEnabled = process.env.CHECKOUT_ENABLED === "true"
+const cashfreeFields = ["CASHFREE_CLIENT_ID", "CASHFREE_CLIENT_SECRET"]
+const cashfreeEnvironment = process.env.CASHFREE_ENV?.trim() || "sandbox"
+const cashfreeApiVersion = process.env.CASHFREE_API_VERSION?.trim() || "2025-01-01"
 
-if (process.env.CHECKOUT_ENABLED === "true") {
+// Payment credentials are deliberately optional while checkout is disabled.
+// This lets staging/production boot safely before the merchant account is ready.
+if (checkoutEnabled) {
+  if (!allPresent(cashfreeFields)) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      `Checkout requires Cashfree credentials: ${cashfreeFields.join(", ")}`
+    )
+  }
+  if (!['sandbox', 'production'].includes(cashfreeEnvironment)) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "CASHFREE_ENV must be sandbox or production"
+    )
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(cashfreeApiVersion)) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "CASHFREE_API_VERSION must use YYYY-MM-DD"
+    )
+  }
+
   let storefront: URL
-  try { storefront = new URL(process.env.STOREFRONT_URL!) }
-  catch { throw new MedusaError(MedusaError.Types.INVALID_DATA, "STOREFRONT_URL must be a valid URL") }
-  if (production && storefront.protocol !== "https:") throw new MedusaError(MedusaError.Types.INVALID_DATA, "Production checkout requires an HTTPS storefront")
+  let backend: URL
+  try {
+    storefront = new URL(process.env.STOREFRONT_URL || "")
+    backend = new URL(backendUrl)
+  } catch {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "Checkout requires valid STOREFRONT_URL and MEDUSA_BACKEND_URL values"
+    )
+  }
+  if (production && (storefront.protocol !== "https:" || backend.protocol !== "https:")) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "Production checkout requires HTTPS storefront and backend URLs"
+    )
+  }
+
+  modules.push({
+    resolve: "@medusajs/medusa/payment",
+    options: {
+      providers: [
+        {
+          resolve: "./src/modules/cashfree",
+          id: "cashfree",
+          options: {
+            client_id: process.env.CASHFREE_CLIENT_ID,
+            client_secret: process.env.CASHFREE_CLIENT_SECRET,
+            environment: cashfreeEnvironment,
+            api_version: cashfreeApiVersion,
+            storefront_url: storefront.toString().replace(/\/$/, ""),
+            backend_url: backend.toString().replace(/\/$/, ""),
+          },
+        },
+      ],
+    },
+  })
 }
 
 const cloudinaryFields = [
@@ -177,7 +226,7 @@ modules.push({
   },
 })
 
-if (production && (requireResendInProduction || process.env.CHECKOUT_ENABLED === "true") && !resendConfigured) {
+if (production && (requireResendInProduction || checkoutEnabled) && !resendConfigured) {
   throw new MedusaError(
     MedusaError.Types.INVALID_DATA,
     "RESEND_API_KEY and RESEND_FROM_EMAIL are required for production checkout or REQUIRE_RESEND_IN_PRODUCTION=true"

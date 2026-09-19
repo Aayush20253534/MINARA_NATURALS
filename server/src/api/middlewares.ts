@@ -1,4 +1,4 @@
-import { validWebhook } from "../modules/razorpay/service"
+import { validCashfreeWebhook } from "../modules/cashfree/service"
 import { authRateLimit, cartOwner, orderOwner, paymentOwner, passwordPolicy } from "./commerce-guards"
 import { authenticate, defineMiddlewares, validateAndTransformBody } from "@medusajs/framework/http"
 import multer from "multer"
@@ -25,8 +25,17 @@ export default defineMiddlewares({
   routes: [
     { matcher: "/auth/customer/emailpass/register", method: "POST", middlewares: [passwordPolicy] },
     { matcher: "/auth/customer/emailpass/update", method: "POST", middlewares: [passwordPolicy] },
-    { matcher: "/hooks/payment/razorpay_razorpay", method: "POST", bodyParser: { preserveRawBody: true }, middlewares: [(req, res, next) => {
-      if (!process.env.RAZORPAY_WEBHOOK_SECRET || !req.rawBody || !validWebhook(req.rawBody, req.headers["x-razorpay-signature"], process.env.RAZORPAY_WEBHOOK_SECRET)) { res.status(401).json({ message: "Invalid webhook signature" }); return }
+    { matcher: "/hooks/payment/cashfree_cashfree", method: "POST", bodyParser: { preserveRawBody: true }, middlewares: [(req, res, next) => {
+      const secret = process.env.CASHFREE_CLIENT_SECRET
+      if (!secret || !req.rawBody || !validCashfreeWebhook(
+        req.rawBody,
+        req.headers["x-webhook-timestamp"],
+        req.headers["x-webhook-signature"],
+        secret,
+      )) {
+        res.status(401).json({ message: "Invalid webhook signature" })
+        return
+      }
       next()
     }] },
     { matcher: "/auth/customer/emailpass*", method: "POST", middlewares: [authRateLimit] },

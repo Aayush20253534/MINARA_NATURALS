@@ -59,10 +59,10 @@ async function checkout(page: Page) {
   ).toBeEnabled();
 }
 async function gateway(page: Page, dismiss = false) {
-  await page.route("https://checkout.razorpay.com/v1/checkout.js", (route) =>
+  await page.route("https://sdk.cashfree.com/js/v3/cashfree.js", (route) =>
     route.fulfill({
       contentType: "application/javascript",
-      body: `window.Razorpay=class{constructor(o){this.o=o;}on(){}open(){setTimeout(()=>${dismiss ? "this.o.modal.ondismiss()" : "(this.o.handler(), this.o.handler(), this.o.modal.ondismiss())"},50);}};`,
+      body: `window.Cashfree=()=>({checkout:async()=>{await new Promise(r=>setTimeout(r,50));return ${dismiss ? '{error:{message:"Payment window closed"}}' : '{paymentDetails:{paymentMessage:"SUCCESS"}}'};}});`,
     }),
   );
 }

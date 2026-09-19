@@ -169,3 +169,94 @@
     font-size: 9px;
   }
 }
+/* Cleaner retail cards: brighter surfaces and a quiet premium hover state. */
+.visual {
+  border-color: #e3eadf;
+  border-radius: 12px;
+  background: #f7faf3;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.card:hover .visual {
+  border-color: #c8d8c1;
+  box-shadow: 0 12px 30px #2d633d12;
+}
+.placeholder {
+  background: #f5f9f1;
+}
+.badge {
+  background: #fffdf7f2;
+}
+.arrow {
+  background: var(--minara-green-100);
+}
+.card:hover .arrow {
+  background: var(--minara-green-800);
+}
+
+/* Finished retail card: contained surface, quiet elevation and clearer pricing. */
+.card {
+  padding: 9px 9px 10px;
+  border: 1px solid #e0e8db;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 28px #245b3808;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: #bfd3b8;
+  box-shadow: 0 18px 42px #245b3810;
+}
+.visual {
+  aspect-ratio: 1.06;
+  border: 0;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 16%, #ffffff 0 16%, transparent 48%),
+    #f4f8f0;
+}
+.body {
+  padding: 13px 5px 2px;
+}
+.body h3 {
+  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.card:hover h3 {
+  color: #287247;
+  text-decoration: none;
+}
+.packs {
+  min-height: 34px;
+  margin-bottom: 10px;
+}
+.footer strong {
+  font-size: 15px;
+}
+.view {
+  min-height: 30px;
+  margin-top: 9px;
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 6px 6px 8px;
+    border-radius: 13px;
+  }
+  .body {
+    padding: 10px 3px 1px;
+  }
+  .body h3 {
+    font-size: 12.5px;
+  }
+  .packs {
+    min-height: 30px;
+    margin-bottom: 7px;
+  }
+  .view {
+    min-height: 27px;
+  }
+}
