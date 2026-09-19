@@ -24,6 +24,12 @@ export type CatalogProduct = {
   handle: string;
   subtitle?: string | null;
   thumbnail?: string | null;
+
+  images?: Array<{
+    id?: string;
+    url: string;
+  }>;
+
   metadata?: Record<string, string | number | boolean | null> | null;
   categories?: Array<{ id: string; name: string; handle: string }>;
   variants?: CatalogVariant[];
@@ -68,12 +74,12 @@ export async function getCatalogPreview() {
     fields: "*category_children",
   });
 
-  const productQuery = new URLSearchParams({
-    limit: "40",
-    country_code: "in",
-    fields:
-      "*variants.calculated_price,+variants.inventory_quantity,+metadata,*categories,*variants.options",
-  });
+ const productQuery = new URLSearchParams({
+  limit: "40",
+  country_code: "in",
+  fields:
+    "+thumbnail,*images,*variants.calculated_price,+variants.inventory_quantity,+metadata,*categories,*variants.options",
+});
 
   const [categoryResponse, productResponse] = await Promise.all([
     storeFetch<ProductCategoryListResponse>(`/store/product-categories?${categoryQuery.toString()}`),

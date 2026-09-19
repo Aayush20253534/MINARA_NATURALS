@@ -34,7 +34,8 @@ function getStockState(product: CatalogProduct) {
     .map((variant) => variant.inventory_quantity)
     .filter((quantity): quantity is number => typeof quantity === "number");
 
-  if (!quantities.length) return { label: "Stock tracked", state: "neutral" as const };
+  if (!quantities.length)
+    return { label: "Stock tracked", state: "neutral" as const };
   if (quantities.every((quantity) => quantity <= 0)) {
     return { label: "Out of stock", state: "out" as const };
   }
@@ -44,14 +45,22 @@ function getStockState(product: CatalogProduct) {
   return { label: "In stock", state: "in" as const };
 }
 
-function CategoryCard({ category, index }: { category: CatalogCategory; index: number }) {
+function CategoryCard({
+  category,
+  index,
+}: {
+  category: CatalogCategory;
+  index: number;
+}) {
   const presentation = categoryCopy[category.handle] ?? {
     note: `${category.category_children?.length ?? 0} collections`,
     tone: "fresh",
   };
 
   return (
-    <article className={`${styles.categoryCard} ${styles[`tone_${presentation.tone}`]}`}>
+    <article
+      className={`${styles.categoryCard} ${styles[`tone_${presentation.tone}`]}`}
+    >
       <div className={styles.categoryTopline}>
         <span>{String(index + 1).padStart(2, "0")}</span>
         <span>{category.category_children?.length ?? 0} collections</span>
@@ -63,7 +72,9 @@ function CategoryCard({ category, index }: { category: CatalogCategory; index: n
       <div className={styles.categoryCopy}>
         <span>{presentation.note}</span>
         <h3>{category.name}</h3>
-        <div className={styles.categoryAction}>Explore assortment <ArrowIcon width={15} height={15} /></div>
+        <div className={styles.categoryAction}>
+          Explore assortment <ArrowIcon width={15} height={15} />
+        </div>
       </div>
     </article>
   );
@@ -73,17 +84,21 @@ function ProductCard({ product }: { product: CatalogProduct }) {
   const metadata = product.metadata ?? {};
   const price = formatPrice(product);
   const stock = getStockState(product);
+  const productImage = product.thumbnail || product.images?.[0]?.url || null;
   const category = product.categories?.[0]?.name ?? "MINARA catalogue";
-  const brand = typeof metadata.brand === "string" ? metadata.brand : "MINARA NATURALS";
+  const brand =
+    typeof metadata.brand === "string" ? metadata.brand : "MINARA NATURALS";
   const badge = typeof metadata.badge === "string" ? metadata.badge : null;
-  const packs = [...new Set((product.variants ?? []).map((variant) => variant.title))].slice(0, 3);
+  const packs = [
+    ...new Set((product.variants ?? []).map((variant) => variant.title)),
+  ].slice(0, 3);
 
   return (
     <article className={styles.productCard}>
       <div className={styles.productVisual}>
-        {product.thumbnail ? (
+        {productImage ? (
           <Image
-            src={product.thumbnail}
+            src={productImage}
             alt={product.title}
             fill
             sizes="(max-width: 700px) 86vw, (max-width: 1100px) 42vw, 280px"
@@ -92,13 +107,19 @@ function ProductCard({ product }: { product: CatalogProduct }) {
         ) : (
           <div className={styles.productPlaceholder} aria-hidden="true">
             <span className={styles.placeholderHalo} />
-            <span className={styles.placeholderLeaf}><LeafIcon width={34} height={34} /></span>
+            <span className={styles.placeholderLeaf}>
+              <LeafIcon width={34} height={34} />
+            </span>
             <strong>MINARA</strong>
             <small>{category}</small>
           </div>
         )}
         {badge && <span className={styles.productBadge}>{badge}</span>}
-        <span className={`${styles.stockBadge} ${styles[`stock_${stock.state}`]}`}>{stock.label}</span>
+        <span
+          className={`${styles.stockBadge} ${styles[`stock_${stock.state}`]}`}
+        >
+          {stock.label}
+        </span>
       </div>
 
       <div className={styles.productBody}>
@@ -110,7 +131,9 @@ function ProductCard({ product }: { product: CatalogProduct }) {
         {product.subtitle && <p>{product.subtitle}</p>}
 
         <div className={styles.packRow} aria-label="Available pack sizes">
-          {packs.map((pack) => <span key={pack}>{pack}</span>)}
+          {packs.map((pack) => (
+            <span key={pack}>{pack}</span>
+          ))}
         </div>
 
         <div className={styles.productFooter}>
@@ -118,7 +141,9 @@ function ProductCard({ product }: { product: CatalogProduct }) {
             <small>Starting at</small>
             <strong>{price ?? "Price configured"}</strong>
           </div>
-          <span className={styles.detailsCue} aria-hidden="true"><ArrowIcon width={17} height={17} /></span>
+          <span className={styles.detailsCue} aria-hidden="true">
+            <ArrowIcon width={17} height={17} />
+          </span>
         </div>
       </div>
     </article>
@@ -140,23 +165,38 @@ export function CatalogPreview({
         <div className={styles.headingRow}>
           <div>
             <p className="eyebrow">Shop by category</p>
-            <h2>Everything your home reaches for, in one thoughtful catalogue.</h2>
+            <h2>
+              Everything your home reaches for, in one thoughtful catalogue.
+            </h2>
           </div>
           <p>
-            MINARA is structured for fresh food, pantry staples, signature products, pooja essentials and daily-care categories without making the storefront feel crowded.
+            MINARA is structured for fresh food, pantry staples, signature
+            products, pooja essentials and daily-care categories without making
+            the storefront feel crowded.
           </p>
         </div>
 
         {categories.length ? (
           <div className={styles.categoryGrid}>
             {categories.map((category, index) => (
-              <CategoryCard category={category} index={index} key={category.id} />
+              <CategoryCard
+                category={category}
+                index={index}
+                key={category.id}
+              />
             ))}
           </div>
         ) : (
           <div className={styles.emptyState}>
             <LeafIcon width={24} height={24} />
-            <div><strong>Catalogue categories are being prepared.</strong><span>{connected ? "No root categories are published yet." : "The commerce API is temporarily unavailable."}</span></div>
+            <div>
+              <strong>Catalogue categories are being prepared.</strong>
+              <span>
+                {connected
+                  ? "No root categories are published yet."
+                  : "The commerce API is temporarily unavailable."}
+              </span>
+            </div>
           </div>
         )}
 
@@ -165,17 +205,26 @@ export function CatalogPreview({
             <p className="eyebrow">Featured assortment</p>
             <h2>Commerce-ready products, not decorative placeholders.</h2>
           </div>
-          <div className={styles.dataPill}><span /> Live Medusa catalogue</div>
+          <div className={styles.dataPill}>
+            <span /> Live Medusa catalogue
+          </div>
         </div>
 
         {products.length ? (
           <div className={styles.productGrid}>
-            {products.map((product) => <ProductCard product={product} key={product.id} />)}
+            {products.map((product) => (
+              <ProductCard product={product} key={product.id} />
+            ))}
           </div>
         ) : (
           <div className={styles.emptyState}>
             <LeafIcon width={24} height={24} />
-            <div><strong>No representative products are available yet.</strong><span>Run the Phase 1.1 seed to populate the commerce catalogue.</span></div>
+            <div>
+              <strong>No representative products are available yet.</strong>
+              <span>
+                Run the Phase 1.1 seed to populate the commerce catalogue.
+              </span>
+            </div>
           </div>
         )}
       </Container>
